@@ -1,10 +1,10 @@
-// app/exercise/create.tsx — Crea Nuovo Esercizio
+// app/exercise/edit/[id].tsx — Modifica Esercizio
 import React, { useState } from 'react';
 import { View, Text, TextInput, StyleSheet, ScrollView, TouchableOpacity, Alert } from 'react-native';
-import { useRouter, Stack } from 'expo-router';
-import { useExerciseStore } from '../../store/exerciseStore';
-import { Exercise, Difficulty } from '../../models/types';
-import { Colors, Spacing, Radius, FontSize } from '../../constants/theme';
+import { useRouter, Stack, useLocalSearchParams } from 'expo-router';
+import { useExerciseStore } from '../../../store/exerciseStore';
+import { Difficulty } from '../../../models/types';
+import { Colors, Spacing, Radius, FontSize } from '../../../constants/theme';
 
 const LIVELLI_DIFFICOLTA: Difficulty[] = ['Principiante', 'Intermedio', 'Avanzato'];
 const OPZIONI_ATTREZZATURA = [
@@ -12,25 +12,36 @@ const OPZIONI_ATTREZZATURA = [
   'Cavi', 'Macchinario', 'Sbarra', 'Elastici', 'Altro',
 ];
 
-export default function CreateExerciseScreen() {
+export default function EditExerciseScreen() {
+  const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
-  const addExercise = useExerciseStore((s) => s.addExercise);
+  const exercises = useExerciseStore((s) => s.exercises);
+  const updateExercise = useExerciseStore((s) => s.updateExercise);
+  const esercizio = exercises.find((e) => e.id === id);
 
-  const [nome, setNome] = useState('');
-  const [muscoloPrincipale, setMuscoloPrincipale] = useState('');
-  const [muscoliSecondari, setMuscoliSecondari] = useState('');
-  const [attrezzatura, setAttrezzatura] = useState('Corpo libero');
-  const [descrizione, setDescrizione] = useState('');
-  const [difficolta, setDifficolta] = useState<Difficulty>('Principiante');
-  const [note, setNote] = useState('');
+  const [nome, setNome] = useState(esercizio?.name ?? '');
+  const [muscoloPrincipale, setMuscoloPrincipale] = useState(esercizio?.primaryMuscle ?? '');
+  const [muscoliSecondari, setMuscoliSecondari] = useState(esercizio?.secondaryMuscles.join(', ') ?? '');
+  const [attrezzatura, setAttrezzatura] = useState(esercizio?.equipment ?? 'Corpo libero');
+  const [descrizione, setDescrizione] = useState(esercizio?.description ?? '');
+  const [difficolta, setDifficolta] = useState<Difficulty>(esercizio?.difficulty ?? 'Principiante');
+  const [note, setNote] = useState(esercizio?.notes ?? '');
+
+  if (!esercizio) {
+    return (
+      <View style={{ flex: 1, backgroundColor: Colors.background, justifyContent: 'center', alignItems: 'center' }}>
+        <Text style={{ color: Colors.danger }}>Esercizio non trovato</Text>
+      </View>
+    );
+  }
 
   const handleSalva = async () => {
     if (!nome.trim() || !muscoloPrincipale.trim()) {
       Alert.alert('Errore', 'Nome e Gruppo Muscolare sono obbligatori.');
       return;
     }
-    const nuovoEsercizio: Exercise = {
-      id: Date.now().toString(),
+    await updateExercise({
+      ...esercizio,
       name: nome.trim(),
       primaryMuscle: muscoloPrincipale.trim(),
       secondaryMuscles: muscoliSecondari.split(',').map((s) => s.trim()).filter(Boolean),
@@ -38,18 +49,26 @@ export default function CreateExerciseScreen() {
       description: descrizione.trim(),
       difficulty: difficolta,
       notes: note.trim() || undefined,
-    };
-    await addExercise(nuovoEsercizio);
+    });
     router.back();
   };
 
   return (
     <ScrollView style={styles.contenitore} contentContainerStyle={styles.contenuto}>
-      <Stack.Screen options={{ title: 'Nuovo Esercizio' }} />
+      <Stack.Screen options={{ title: 'Modifica Esercizio' }} />
 
-      <CampoTesto etichetta="Nome Esercizio *" valore={nome} onChange={setNome} placeholder="es. Panca Piana" />
-      <CampoTesto etichetta="Gruppo Muscolare Principale *" valore={muscoloPrincipale} onChange={setMuscoloPrincipale} placeholder="es. Pettorali" />
-      <CampoTesto etichetta="Muscoli Secondari" valore={muscoliSecondari} onChange={setMuscoliSecondari} placeholder="es. Tricipiti, Spalle (separati da virgola)" />
+      <View style={styles.gruppoCampo}>
+        <Text style={styles.etichetta}>Nome Esercizio *</Text>
+        <TextInput style={styles.input} value={nome} onChangeText={setNome} placeholderTextColor={Colors.textMuted} />
+      </View>
+      <View style={styles.gruppoCampo}>
+        <Text style={styles.etichetta}>Gruppo Muscolare Principale *</Text>
+        <TextInput style={styles.input} value={muscoloPrincipale} onChangeText={setMuscoloPrincipale} placeholderTextColor={Colors.textMuted} />
+      </View>
+      <View style={styles.gruppoCampo}>
+        <Text style={styles.etichetta}>Muscoli Secondari</Text>
+        <TextInput style={styles.input} value={muscoliSecondari} onChangeText={setMuscoliSecondari} placeholderTextColor={Colors.textMuted} placeholder="separati da virgola" />
+      </View>
 
       <View style={styles.gruppoCampo}>
         <Text style={styles.etichetta}>Difficoltà</Text>
@@ -81,33 +100,21 @@ export default function CreateExerciseScreen() {
         </View>
       </View>
 
-      <CampoTesto etichetta="Descrizione" valore={descrizione} onChange={setDescrizione} placeholder="Istruzioni tecniche..." multilinea />
-      <CampoTesto etichetta="Note" valore={note} onChange={setNote} placeholder="Consigli extra..." multilinea />
+      <View style={styles.gruppoCampo}>
+        <Text style={styles.etichetta}>Descrizione</Text>
+        <TextInput style={[styles.input, styles.areaTestuale]} value={descrizione} onChangeText={setDescrizione} multiline numberOfLines={3} placeholderTextColor={Colors.textMuted} />
+      </View>
+
+      <View style={styles.gruppoCampo}>
+        <Text style={styles.etichetta}>Note</Text>
+        <TextInput style={[styles.input, styles.areaTestuale]} value={note} onChangeText={setNote} multiline numberOfLines={3} placeholderTextColor={Colors.textMuted} />
+      </View>
 
       <TouchableOpacity style={styles.pulsanteSalva} onPress={handleSalva}>
-        <Text style={styles.testoPulsanteSalva}>Salva Esercizio</Text>
+        <Text style={styles.testoPulsanteSalva}>Salva Modifiche</Text>
       </TouchableOpacity>
       <View style={{ height: 40 }} />
     </ScrollView>
-  );
-}
-
-function CampoTesto({ etichetta, valore, onChange, placeholder, multilinea }: {
-  etichetta: string; valore: string; onChange: (t: string) => void; placeholder?: string; multilinea?: boolean;
-}) {
-  return (
-    <View style={styles.gruppoCampo}>
-      <Text style={styles.etichetta}>{etichetta}</Text>
-      <TextInput
-        style={[styles.input, multilinea && styles.areaTestuale]}
-        placeholder={placeholder}
-        placeholderTextColor={Colors.textMuted}
-        value={valore}
-        onChangeText={onChange}
-        multiline={multilinea}
-        numberOfLines={multilinea ? 3 : 1}
-      />
-    </View>
   );
 }
 

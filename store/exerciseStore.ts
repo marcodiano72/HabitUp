@@ -1,40 +1,54 @@
 // store/exerciseStore.ts
 import { create } from 'zustand';
-import { persist, createJSONStorage } from 'zustand/middleware'; // Importiamo i tool per la persistenza
-import AsyncStorage from '@react-native-async-storage/async-storage'; // Importiamo la memoria del telefono
-
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Exercise } from '../models/types';
 import { MOCK_EXERCISES } from '../models/mockData';
 
-// La struttura del nostro magazzino rimane identica
+const STORAGE_KEY = '@exercises';
+
 interface ExerciseState {
   exercises: Exercise[];
-  addExercise: (exercise: Exercise) => void;
-  deleteExercise: (id: string) => void;
+  isHydrated: boolean;
+  hydrate: () => Promise<void>;
+  addExercise: (exercise: Exercise) => Promise<void>;
+  updateExercise: (exercise: Exercise) => Promise<void>;
+  deleteExercise: (id: string) => Promise<void>;
 }
 
-// Creiamo il magazzino avvolgendolo in "persist"
-export const useExerciseStore = create<ExerciseState>()(
-  persist(
-    (set) => ({
-      // Dati di partenza (se l'app viene aperta per la prima volta in assoluto)
-      exercises: MOCK_EXERCISES,
+export const useExerciseStore = create<ExerciseState>((set, get) => ({
+  exercises: [],
+  isHydrated: false,
 
-      // Funzione per aggiungere un nuovo esercizio
-      addExercise: (newExercise) => 
-        set((state) => ({ 
-          exercises: [...state.exercises, newExercise] 
-        })),
-
-      // Funzione per eliminare un esercizio
-      deleteExercise: (id) => 
-        set((state) => ({ 
-          exercises: state.exercises.filter(exercise => exercise.id !== id) 
-        })),
-    }),
-    {
-      name: 'habitup-exercises-storage', // Il "nome del file" salvato nel telefono
-      storage: createJSONStorage(() => AsyncStorage), // Diciamo di usare AsyncStorage
+  hydrate: async () => {
+    try {
+      const raw = await AsyncStorage.getItem(STORAGE_KEY);
+      if (raw) {
+        set({ exercises: JSON.parse(raw), isHydrated: true });
+      } else {
+        // Prima installazione: carichiamo i dati di esempio
+        await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(MOCK_EXERCISES));
+        set({ exercises: MOCK_EXERCISES, isHydrated: true });
+      }
+    } catch {
+      set({ exercises: MOCK_EXERCISES, isHydrated: true });
     }
-  )
-);
+  },
+
+  addExercise: async (exercise) => {
+    const updated = [...get().exercises, exercise];
+    set({ exercises: updated });
+    await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
+  },
+
+  updateExercise: async (exercise) => {
+    const updated = get().exercises.map((e) => (e.id === exercise.id ? exercise : e));
+    set({ exercises: updated });
+    await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
+  },
+
+  deleteExercise: async (id) => {
+    const updated = get().exercises.filter((e) => e.id !== id);
+    set({ exercises: updated });
+    await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
+  },
+}));
