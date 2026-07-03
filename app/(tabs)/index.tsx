@@ -1,4 +1,4 @@
-// app/(tabs)/index.tsx — Dashboard Home
+// app/(tabs)/index.tsx — Dashboard Home (Light Mode Premium)
 import React from 'react';
 import {
   View,
@@ -6,6 +6,7 @@ import {
   StyleSheet,
   ScrollView,
   TouchableOpacity,
+  ImageBackground,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
@@ -22,284 +23,183 @@ export default function HomeScreen() {
   const sessions = useSessionStore((s) => s.sessions);
   const plans = useWorkoutPlanStore((s) => s.plans);
 
-  // Statistiche veloci
+  // Stats
   const totalWorkouts = history.length;
   const activeGoals = goals.filter((g) => g.status === 'Attivo').length;
 
-  // Sessione pianificata oggi
   const todayStr = new Date().toISOString().split('T')[0];
-  const todaySession = sessions.find(
-    (s) => s.scheduledDate === todayStr && s.status === 'planned'
-  );
-  const todayPlan = todaySession
-    ? plans.find((p) => p.id === todaySession.planId)
-    : null;
+  const todaySession = sessions.find((s) => s.scheduledDate === todayStr && s.status === 'planned');
+  const todayPlan = todaySession ? plans.find((p) => p.id === todaySession.planId) : null;
 
-  // Ultimo allenamento
   const lastWorkout = history.length > 0 ? history[0] : null;
-
-  // Calcolo frequenza settimanale
-  const oneWeekAgo = new Date();
-  oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
-  const weeklyCount = history.filter(
-    (s) => new Date(s.date) >= oneWeekAgo
-  ).length;
 
   const greeting = (() => {
     const h = new Date().getHours();
-    if (h < 12) return 'Buongiorno 🌅';
-    if (h < 18) return 'Buon pomeriggio ☀️';
-    return 'Buonasera 🌙';
+    if (h < 12) return 'Buongiorno';
+    if (h < 18) return 'Buon pomeriggio';
+    return 'Buonasera';
   })();
 
+  const d = new Date();
+  const todayFormatted = d.toLocaleDateString('it-IT', { weekday: 'long', day: 'numeric', month: 'long' });
+
   return (
-    <ScrollView style={styles.container} contentContainerStyle={styles.content}>
-      {/* Header */}
+    <ScrollView style={styles.container} contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
+      {/* Intestazione Dashboard */}
       <View style={styles.header}>
-        <Text style={styles.greeting}>{greeting}</Text>
-        <Text style={styles.title}>Fitness Tracker</Text>
+        <View>
+          <Text style={styles.greeting}>{greeting}, Atleta! 👋</Text>
+          <Text style={styles.date}>{todayFormatted}</Text>
+        </View>
+        <TouchableOpacity style={styles.profileIcon}>
+          <Ionicons name="person-circle" size={48} color={Colors.primary} />
+        </TouchableOpacity>
       </View>
 
-      {/* Sessione di oggi */}
+      {/* Hero Card: Prossimo Allenamento */}
+      <Text style={styles.sectionTitle}>In programma oggi</Text>
       {todayPlan ? (
         <TouchableOpacity
-          style={styles.todayCard}
-          onPress={() =>
-            router.push({
-              pathname: '/session/active/[id]',
-              params: { id: todaySession!.id },
-            })
-          }
-          activeOpacity={0.85}
+          style={styles.heroCard}
+          activeOpacity={0.9}
+          onPress={() => router.push({ pathname: '/session/active/[id]', params: { id: todaySession!.id } })}
         >
-          <View style={styles.todayHeader}>
-            <Ionicons name="flash" size={20} color={Colors.primary} />
-            <Text style={styles.todayLabel}>Allenamento di oggi</Text>
+          <View style={styles.heroContent}>
+            <View style={styles.heroBadge}>
+              <Text style={styles.heroBadgeText}>PRONTO</Text>
+            </View>
+            <Text style={styles.heroTitle}>{todayPlan.name}</Text>
+            <Text style={styles.heroSub}>{todayPlan.expectedDuration} min • {todayPlan.exercises.length} esercizi</Text>
           </View>
-          <Text style={styles.todayPlanName}>{todayPlan.name}</Text>
-          <Text style={styles.todayMeta}>
-            {todayPlan.expectedDuration} min · {todayPlan.exercises.length} esercizi
-          </Text>
-          <View style={styles.startBtn}>
-            <Ionicons name="play" size={16} color="#fff" />
-            <Text style={styles.startBtnText}>Inizia ora</Text>
+          <View style={styles.heroPlayBtn}>
+            <Ionicons name="play" size={24} color={Colors.primary} />
           </View>
         </TouchableOpacity>
       ) : (
         <TouchableOpacity
-          style={styles.emptyTodayCard}
+          style={styles.heroEmptyCard}
+          activeOpacity={0.8}
           onPress={() => router.push('/session/create')}
-          activeOpacity={0.85}
         >
-          <Ionicons name="add-circle-outline" size={32} color={Colors.textMuted} />
-          <Text style={styles.emptyTodayText}>Nessun allenamento pianificato</Text>
-          <Text style={styles.emptyTodaySubText}>Tocca per pianificarne uno</Text>
+          <View style={styles.heroEmptyIcon}>
+            <Ionicons name="calendar-outline" size={32} color={Colors.primary} />
+          </View>
+          <Text style={styles.heroEmptyTitle}>Giorno di riposo?</Text>
+          <Text style={styles.heroEmptySub}>Tocca per pianificare un allenamento</Text>
         </TouchableOpacity>
       )}
 
-      {/* Stats cards */}
-      <Text style={styles.sectionTitle}>Le tue statistiche</Text>
-      <View style={styles.statsRow}>
-        <View style={[styles.statCard, { borderColor: Colors.primary }]}>
+      {/* Azioni Rapide Circolari */}
+      <View style={styles.quickActionsGrid}>
+        <QuickAction icon="barbell" label="Esercizi" color={Colors.accent} onPress={() => router.push('/exercise/create')} />
+        <QuickAction icon="document-text" label="Schede" color={Colors.warning} onPress={() => router.push('/plan/create')} />
+        <QuickAction icon="calendar" label="Pianifica" color={Colors.success} onPress={() => router.push('/session/create')} />
+        <QuickAction icon="trophy" label="Obiettivi" color={Colors.danger} onPress={() => router.push('/goal/create')} />
+      </View>
+
+      {/* Riepilogo e Statistiche */}
+      <View style={styles.statsContainer}>
+        <View style={styles.statBox}>
+          <View style={[styles.statIconWrapper, { backgroundColor: Colors.primaryLight + '20' }]}>
+            <Ionicons name="flame" size={24} color={Colors.primary} />
+          </View>
           <Text style={styles.statValue}>{totalWorkouts}</Text>
-          <Text style={styles.statLabel}>Allenamenti totali</Text>
+          <Text style={styles.statLabel}>Sessioni Totali</Text>
         </View>
-        <View style={[styles.statCard, { borderColor: Colors.success }]}>
-          <Text style={styles.statValue}>{weeklyCount}</Text>
-          <Text style={styles.statLabel}>Questa settimana</Text>
-        </View>
-        <View style={[styles.statCard, { borderColor: Colors.warning }]}>
+        <View style={styles.statBox}>
+          <View style={[styles.statIconWrapper, { backgroundColor: Colors.warning + '20' }]}>
+            <Ionicons name="flag" size={24} color={Colors.warning} />
+          </View>
           <Text style={styles.statValue}>{activeGoals}</Text>
-          <Text style={styles.statLabel}>Obiettivi attivi</Text>
+          <Text style={styles.statLabel}>Obiettivi Attivi</Text>
         </View>
       </View>
 
-      {/* Ultimo allenamento */}
+      {/* Ultima Attività */}
       {lastWorkout && (
-        <>
-          <Text style={styles.sectionTitle}>Ultimo allenamento</Text>
-          <View style={styles.lastWorkoutCard}>
-            <View style={styles.lastWorkoutHeader}>
-              <Ionicons name="checkmark-circle" size={20} color={Colors.success} />
-              <Text style={styles.lastWorkoutName}>
-                {lastWorkout.planName ?? 'Allenamento libero'}
+        <View style={styles.lastActivitySection}>
+          <Text style={styles.sectionTitle}>Ultima Attività</Text>
+          <View style={styles.lastActivityCard}>
+            <View style={styles.activityIcon}>
+              <Ionicons name="checkmark-done" size={20} color="#fff" />
+            </View>
+            <View style={styles.activityInfo}>
+              <Text style={styles.activityTitle}>{lastWorkout.planName ?? 'Allenamento Libero'}</Text>
+              <Text style={styles.activityDate}>
+                {new Date(lastWorkout.date).toLocaleDateString('it-IT')} • {lastWorkout.duration} min
               </Text>
             </View>
-            <Text style={styles.lastWorkoutMeta}>
-              {new Date(lastWorkout.date).toLocaleDateString('it-IT', {
-                weekday: 'long',
-                day: 'numeric',
-                month: 'long',
-              })}
-            </Text>
-            <View style={styles.lastWorkoutStats}>
-              <View style={styles.lastWorkoutStat}>
-                <Ionicons name="time-outline" size={14} color={Colors.textMuted} />
-                <Text style={styles.lastWorkoutStatText}>{lastWorkout.duration} min</Text>
-              </View>
-              <View style={styles.lastWorkoutStat}>
-                <Ionicons name="battery-half-outline" size={14} color={Colors.textMuted} />
-                <Text style={styles.lastWorkoutStatText}>
-                  RPE {lastWorkout.fatigueLevel}/10
-                </Text>
-              </View>
+            <View style={styles.activityRpe}>
+              <Text style={styles.activityRpeValue}>{lastWorkout.fatigueLevel}</Text>
+              <Text style={styles.activityRpeLabel}>RPE</Text>
             </View>
           </View>
-        </>
+        </View>
       )}
 
-      {/* Quick actions */}
-      <Text style={styles.sectionTitle}>Azioni rapide</Text>
-      <View style={styles.quickActions}>
-        <TouchableOpacity
-          style={styles.quickBtn}
-          onPress={() => router.push('/exercise/create')}
-        >
-          <Ionicons name="barbell-outline" size={22} color={Colors.primary} />
-          <Text style={styles.quickBtnText}>Esercizio</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={styles.quickBtn}
-          onPress={() => router.push('/plan/create')}
-        >
-          <Ionicons name="clipboard-outline" size={22} color={Colors.accent} />
-          <Text style={styles.quickBtnText}>Scheda</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={styles.quickBtn}
-          onPress={() => router.push('/session/create')}
-        >
-          <Ionicons name="calendar-outline" size={22} color={Colors.success} />
-          <Text style={styles.quickBtnText}>Sessione</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={styles.quickBtn}
-          onPress={() => router.push('/goal/create')}
-        >
-          <Ionicons name="trophy-outline" size={22} color={Colors.warning} />
-          <Text style={styles.quickBtnText}>Obiettivo</Text>
-        </TouchableOpacity>
-      </View>
-
-      <View style={{ height: 24 }} />
+      <View style={{ height: 40 }} />
     </ScrollView>
+  );
+}
+
+function QuickAction({ icon, label, color, onPress }: { icon: any; label: string; color: string; onPress: () => void }) {
+  return (
+    <TouchableOpacity style={styles.quickActionItem} onPress={onPress}>
+      <View style={[styles.quickActionCircle, { backgroundColor: color + '15' }]}>
+        <Ionicons name={icon} size={28} color={color} />
+      </View>
+      <Text style={styles.quickActionLabel}>{label}</Text>
+    </TouchableOpacity>
   );
 }
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: Colors.background },
   content: { padding: Spacing.md },
-  header: { marginBottom: Spacing.lg, paddingTop: Spacing.sm },
-  greeting: { fontSize: FontSize.md, color: Colors.textSecondary },
-  title: {
-    fontSize: FontSize.xxxl,
-    fontWeight: 'bold',
-    color: Colors.textPrimary,
-    marginTop: 2,
-  },
+  
+  // Header
+  header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: Spacing.xl, marginTop: Spacing.sm },
+  greeting: { fontSize: FontSize.xxxl, fontWeight: '800', color: Colors.textPrimary, letterSpacing: -0.5 },
+  date: { fontSize: FontSize.md, color: Colors.textSecondary, fontWeight: '500', marginTop: 2, textTransform: 'capitalize' },
+  profileIcon: { ...Shadow.sm },
 
-  // Today card
-  todayCard: {
-    backgroundColor: Colors.surfaceElevated,
-    borderRadius: Radius.lg,
-    padding: Spacing.lg,
-    marginBottom: Spacing.lg,
-    borderLeftWidth: 3,
-    borderLeftColor: Colors.primary,
-    ...Shadow.md,
-  },
-  todayHeader: { flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 8 },
-  todayLabel: { fontSize: FontSize.sm, color: Colors.primary, fontWeight: '600' },
-  todayPlanName: {
-    fontSize: FontSize.xl,
-    fontWeight: 'bold',
-    color: Colors.textPrimary,
-    marginBottom: 4,
-  },
-  todayMeta: { fontSize: FontSize.sm, color: Colors.textSecondary, marginBottom: 16 },
-  startBtn: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: Colors.primary,
-    borderRadius: Radius.md,
-    paddingVertical: 10,
-    paddingHorizontal: 16,
-    alignSelf: 'flex-start',
-    gap: 6,
-  },
-  startBtnText: { color: '#fff', fontWeight: 'bold', fontSize: FontSize.md },
+  sectionTitle: { fontSize: FontSize.lg, fontWeight: '700', color: Colors.textPrimary, marginBottom: Spacing.sm, letterSpacing: -0.3 },
 
-  emptyTodayCard: {
-    backgroundColor: Colors.surface,
-    borderRadius: Radius.lg,
-    padding: Spacing.xl,
-    marginBottom: Spacing.lg,
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: Colors.border,
-    borderStyle: 'dashed',
-  },
-  emptyTodayText: { color: Colors.textSecondary, fontWeight: '600', marginTop: 10 },
-  emptyTodaySubText: { color: Colors.textMuted, fontSize: FontSize.sm, marginTop: 4 },
+  // Hero Card
+  heroCard: { backgroundColor: Colors.primary, borderRadius: Radius.xl, padding: Spacing.xl, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: Spacing.xl, ...Shadow.lg },
+  heroContent: { flex: 1 },
+  heroBadge: { backgroundColor: 'rgba(255,255,255,0.2)', alignSelf: 'flex-start', paddingHorizontal: 10, paddingVertical: 4, borderRadius: Radius.full, marginBottom: 8 },
+  heroBadgeText: { color: '#fff', fontSize: FontSize.xs, fontWeight: 'bold', letterSpacing: 1 },
+  heroTitle: { fontSize: FontSize.xxl, fontWeight: '800', color: '#fff', marginBottom: 4 },
+  heroSub: { fontSize: FontSize.md, color: 'rgba(255,255,255,0.8)', fontWeight: '500' },
+  heroPlayBtn: { width: 56, height: 56, borderRadius: 28, backgroundColor: '#fff', alignItems: 'center', justifyContent: 'center', ...Shadow.md },
 
-  // Section title
-  sectionTitle: {
-    fontSize: FontSize.md,
-    fontWeight: 'bold',
-    color: Colors.textSecondary,
-    marginBottom: Spacing.sm,
-    textTransform: 'uppercase',
-    letterSpacing: 1,
-  },
+  heroEmptyCard: { backgroundColor: Colors.surface, borderRadius: Radius.xl, padding: Spacing.xl, alignItems: 'center', justifyContent: 'center', marginBottom: Spacing.xl, borderWidth: 1, borderColor: Colors.border, borderStyle: 'dashed' },
+  heroEmptyIcon: { width: 64, height: 64, borderRadius: 32, backgroundColor: Colors.primaryLight + '20', alignItems: 'center', justifyContent: 'center', marginBottom: 12 },
+  heroEmptyTitle: { fontSize: FontSize.lg, fontWeight: 'bold', color: Colors.textPrimary, marginBottom: 4 },
+  heroEmptySub: { fontSize: FontSize.sm, color: Colors.textSecondary },
+
+  // Quick Actions
+  quickActionsGrid: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: Spacing.xl, paddingHorizontal: 4 },
+  quickActionItem: { alignItems: 'center', width: '22%' },
+  quickActionCircle: { width: 60, height: 60, borderRadius: 30, alignItems: 'center', justifyContent: 'center', marginBottom: 8 },
+  quickActionLabel: { fontSize: FontSize.xs, fontWeight: '600', color: Colors.textSecondary },
 
   // Stats
-  statsRow: { flexDirection: 'row', gap: Spacing.sm, marginBottom: Spacing.lg },
-  statCard: {
-    flex: 1,
-    backgroundColor: Colors.surface,
-    borderRadius: Radius.md,
-    padding: Spacing.md,
-    alignItems: 'center',
-    borderBottomWidth: 2,
-  },
-  statValue: {
-    fontSize: FontSize.xxl,
-    fontWeight: 'bold',
-    color: Colors.textPrimary,
-  },
-  statLabel: { fontSize: FontSize.xs, color: Colors.textSecondary, marginTop: 4, textAlign: 'center' },
+  statsContainer: { flexDirection: 'row', gap: Spacing.md, marginBottom: Spacing.xl },
+  statBox: { flex: 1, backgroundColor: Colors.surface, borderRadius: Radius.lg, padding: Spacing.lg, alignItems: 'center', ...Shadow.sm, borderWidth: 1, borderColor: Colors.border },
+  statIconWrapper: { width: 48, height: 48, borderRadius: 24, alignItems: 'center', justifyContent: 'center', marginBottom: 12 },
+  statValue: { fontSize: FontSize.xxxl, fontWeight: '800', color: Colors.textPrimary, marginBottom: 2 },
+  statLabel: { fontSize: FontSize.sm, color: Colors.textSecondary, fontWeight: '500' },
 
-  // Last workout
-  lastWorkoutCard: {
-    backgroundColor: Colors.surface,
-    borderRadius: Radius.lg,
-    padding: Spacing.md,
-    marginBottom: Spacing.lg,
-    borderWidth: 1,
-    borderColor: Colors.border,
-  },
-  lastWorkoutHeader: { flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 4 },
-  lastWorkoutName: { fontSize: FontSize.lg, fontWeight: 'bold', color: Colors.textPrimary },
-  lastWorkoutMeta: { fontSize: FontSize.sm, color: Colors.textSecondary, marginBottom: 10 },
-  lastWorkoutStats: { flexDirection: 'row', gap: Spacing.lg },
-  lastWorkoutStat: { flexDirection: 'row', alignItems: 'center', gap: 4 },
-  lastWorkoutStatText: { fontSize: FontSize.sm, color: Colors.textSecondary },
-
-  // Quick actions
-  quickActions: {
-    flexDirection: 'row',
-    gap: Spacing.sm,
-    marginBottom: Spacing.md,
-  },
-  quickBtn: {
-    flex: 1,
-    backgroundColor: Colors.surface,
-    borderRadius: Radius.md,
-    padding: Spacing.md,
-    alignItems: 'center',
-    gap: 6,
-    borderWidth: 1,
-    borderColor: Colors.border,
-  },
-  quickBtnText: { fontSize: FontSize.xs, color: Colors.textSecondary, fontWeight: '600' },
+  // Last Activity
+  lastActivitySection: { marginBottom: Spacing.md },
+  lastActivityCard: { flexDirection: 'row', backgroundColor: Colors.surface, borderRadius: Radius.lg, padding: Spacing.md, alignItems: 'center', ...Shadow.sm, borderWidth: 1, borderColor: Colors.border },
+  activityIcon: { width: 40, height: 40, borderRadius: 20, backgroundColor: Colors.success, alignItems: 'center', justifyContent: 'center', marginRight: 12 },
+  activityInfo: { flex: 1 },
+  activityTitle: { fontSize: FontSize.md, fontWeight: '700', color: Colors.textPrimary, marginBottom: 2 },
+  activityDate: { fontSize: FontSize.sm, color: Colors.textSecondary },
+  activityRpe: { alignItems: 'center', paddingLeft: 12, borderLeftWidth: 1, borderLeftColor: Colors.border },
+  activityRpeValue: { fontSize: FontSize.lg, fontWeight: '800', color: Colors.textPrimary },
+  activityRpeLabel: { fontSize: FontSize.xs, color: Colors.textMuted, fontWeight: '600' },
 });

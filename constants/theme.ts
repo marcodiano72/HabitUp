@@ -1,44 +1,36 @@
 // constants/theme.ts
-
 export const Colors = {
-  // Palette principale — viola/indaco premium
-  primary: '#6C63FF',
-  primaryDark: '#5A54D4',
-  primaryLight: '#EEF0FF',
+  // Vibrant fitness orange
+  primary: '#FF5722',
+  primaryDark: '#E64A19',
+  primaryLight: '#FF8A65',
+  
+  accent: '#03A9F4', // Fresh blue
+  success: '#34C759', // iOS green
+  warning: '#FF9500', // iOS orange
+  danger: '#FF3B30', // iOS red
 
-  // Accenti
-  accent: '#FF6584',
-  accentLight: '#FFE8ED',
+  // Light Mode Backgrounds
+  background: '#F2F2F7', // iOS grouped background
+  surface: '#FFFFFF',
+  surfaceElevated: '#FFFFFF',
 
-  // Successo / Avviso / Errore
-  success: '#22C55E',
-  successLight: '#DCFCE7',
-  warning: '#F59E0B',
-  warningLight: '#FEF3C7',
-  danger: '#EF4444',
-  dangerLight: '#FEE2E2',
+  // Text
+  textPrimary: '#000000',
+  textSecondary: '#3C3C43', // iOS secondary label
+  textMuted: '#8E8E93', // iOS tertiary label
 
-  // Difficoltà
-  beginner: '#22C55E',
-  intermediate: '#F59E0B',
-  advanced: '#EF4444',
+  // Borders
+  border: '#E5E5EA', // Light border
 
-  // Neutrali
-  background: '#0F0F1A',
-  surface: '#1A1A2E',
-  surfaceElevated: '#252540',
-  border: '#2E2E4A',
-  borderLight: '#3A3A5C',
+  // Difficulties
+  beginner: '#34C759',
+  intermediate: '#FF9500',
+  advanced: '#FF3B30',
 
-  // Testo
-  textPrimary: '#FFFFFF',
-  textSecondary: '#A0A0C0',
-  textMuted: '#606080',
-
-  // Tab bar
-  tabBar: '#12121F',
-  tabBarActive: '#6C63FF',
-  tabBarInactive: '#606080',
+  tabBarActive: '#FF5722',
+  tabBarInactive: '#8E8E93',
+  tabBar: '#FFFFFF',
 };
 
 export const Spacing = {
@@ -59,10 +51,10 @@ export const Radius = {
 };
 
 export const FontSize = {
-  xs: 11,
-  sm: 13,
-  md: 15,
-  lg: 17,
+  xs: 12,
+  sm: 14,
+  md: 16,
+  lg: 18,
   xl: 20,
   xxl: 24,
   xxxl: 32,
@@ -71,23 +63,23 @@ export const FontSize = {
 export const Shadow = {
   sm: {
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.3,
-    shadowRadius: 4,
-    elevation: 3,
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 2,
+    elevation: 2,
   },
   md: {
-    shadowColor: '#6C63FF',
+    shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.25,
-    shadowRadius: 8,
-    elevation: 6,
+    shadowOpacity: 0.08,
+    shadowRadius: 10,
+    elevation: 4,
   },
   lg: {
-    shadowColor: '#6C63FF',
+    shadowColor: '#000',
     shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.35,
+    shadowOpacity: 0.12,
     shadowRadius: 16,
-    elevation: 10,
+    elevation: 8,
   },
 };
