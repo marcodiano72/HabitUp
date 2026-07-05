@@ -42,7 +42,7 @@ export default function CreateGoalScreen() {
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
-      <Stack.Screen options={{ title: 'Nuovo Obiettivo' }} />
+      <Stack.Screen options={{ title: 'Nuovo Obiettivo', headerBackTitle: 'back' }} />
 
       <View style={styles.fieldGroup}>
         <Text style={styles.label}>Titolo *</Text>

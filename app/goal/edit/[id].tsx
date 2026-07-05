@@ -64,7 +64,7 @@ export default function EditGoalScreen() {
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
-      <Stack.Screen options={{ title: 'Modifica Obiettivo' }} />
+      <Stack.Screen options={{ title: 'Modifica Obiettivo', headerBackTitle: 'back' }} />
 
       {/* Preview progresso */}
       <View style={styles.previewCard}>

@@ -55,7 +55,7 @@ export default function EditExerciseScreen() {
 
   return (
     <ScrollView style={styles.contenitore} contentContainerStyle={styles.contenuto}>
-      <Stack.Screen options={{ title: 'Modifica Esercizio' }} />
+      <Stack.Screen options={{ title: 'Modifica Esercizio', headerBackTitle: 'back' }} />
 
       <View style={styles.gruppoCampo}>
         <Text style={styles.etichetta}>Nome Esercizio *</Text>

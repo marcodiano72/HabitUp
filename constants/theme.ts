@@ -1,35 +1,35 @@
 // constants/theme.ts
 export const Colors = {
-  // Vibrant fitness orange
-  primary: '#FF5722',
-  primaryDark: '#E64A19',
-  primaryLight: '#FF8A65',
+  // Vibrant HabitUp Blue & Green
+  primary: '#0084FF', // Premium Blue
+  primaryDark: '#0059B3',
+  primaryLight: '#B2DFDB', // Soft Aquamarine accent
   
-  accent: '#03A9F4', // Fresh blue
-  success: '#34C759', // iOS green
+  accent: '#00D084', // Premium Emerald Green
+  success: '#00D084', // Emerald Green for success state
   warning: '#FF9500', // iOS orange
   danger: '#FF3B30', // iOS red
 
   // Light Mode Backgrounds
-  background: '#F2F2F7', // iOS grouped background
+  background: '#E0F2F1', // Premium Light Aquamarine background
   surface: '#FFFFFF',
   surfaceElevated: '#FFFFFF',
 
   // Text
-  textPrimary: '#000000',
-  textSecondary: '#3C3C43', // iOS secondary label
-  textMuted: '#8E8E93', // iOS tertiary label
+  textPrimary: '#1E293B', // Slate 800
+  textSecondary: '#64748B', // Slate 500
+  textMuted: '#94A3B8', // Slate 400
 
   // Borders
-  border: '#E5E5EA', // Light border
+  border: '#E2E8F0', // Slate 200
 
   // Difficulties
-  beginner: '#34C759',
+  beginner: '#00D084',
   intermediate: '#FF9500',
   advanced: '#FF3B30',
 
-  tabBarActive: '#FF5722',
-  tabBarInactive: '#8E8E93',
+  tabBarActive: '#0084FF',
+  tabBarInactive: '#94A3B8',
   tabBar: '#FFFFFF',
 };
 

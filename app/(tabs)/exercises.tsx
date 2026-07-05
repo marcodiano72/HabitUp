@@ -1,4 +1,4 @@
-// app/(tabs)/exercises.tsx — Lista Esercizi con ricerca
+// app/(tabs)/exercises.tsx — Lista Esercizi con ricerca e filtri avanzati
 import React, { useState, useMemo } from 'react';
 import {
   View,
@@ -7,6 +7,7 @@ import {
   FlatList,
   TouchableOpacity,
   TextInput,
+  ScrollView,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
@@ -25,22 +26,38 @@ const MUSCLE_GROUPS = [
   'Quadricipiti', 'Glutei', 'Femorali', 'Core',
 ];
 
+const DIFFICOLTA_FILTRI = ['Tutti', 'Principiante', 'Intermedio', 'Avanzato'];
+const ATTREZZATURA_FILTRI = ['Tutti', 'Corpo Libero', 'Manubri', 'Bilanciere', 'Macchine', 'Elastici', 'Panca'];
+
 export default function ExercisesScreen() {
   const router = useRouter();
   const exercises = useExerciseStore((state) => state.exercises);
   const [search, setSearch] = useState('');
   const [filtroMuscolo, setFiltroMuscolo] = useState('Tutti');
+  const [filtroDifficolta, setFiltroDifficolta] = useState('Tutti');
+  const [filtroAttrezzatura, setFiltroAttrezzatura] = useState('Tutti');
+  const [mostraFiltri, setMostraFiltri] = useState(false);
 
   const eserciziFiltrati = useMemo(() => {
     return exercises.filter((e) => {
       const corrispondeRicerca =
         e.name.toLowerCase().includes(search.toLowerCase()) ||
         e.primaryMuscle.toLowerCase().includes(search.toLowerCase());
-      const corrispondeFiltro =
+      
+      const corrispondeFiltroMuscolo =
         filtroMuscolo === 'Tutti' || e.primaryMuscle === filtroMuscolo;
-      return corrispondeRicerca && corrispondeFiltro;
+      
+      const corrispondeFiltroDifficolta =
+        filtroDifficolta === 'Tutti' || e.difficulty === filtroDifficolta;
+      
+      const corrispondeFiltroAttrezzatura =
+        filtroAttrezzatura === 'Tutti' ||
+        e.equipment.toLowerCase().includes(filtroAttrezzatura.toLowerCase()) ||
+        (filtroAttrezzatura === 'Corpo Libero' && (e.equipment === 'Nessuna' || e.equipment.toLowerCase().includes('corpo libero')));
+
+      return corrispondeRicerca && corrispondeFiltroMuscolo && corrispondeFiltroDifficolta && corrispondeFiltroAttrezzatura;
     });
-  }, [exercises, search, filtroMuscolo]);
+  }, [exercises, search, filtroMuscolo, filtroDifficolta, filtroAttrezzatura]);
 
   const renderCardEsercizio = ({ item }: { item: Exercise }) => (
     <TouchableOpacity
@@ -96,52 +113,97 @@ export default function ExercisesScreen() {
     </TouchableOpacity>
   );
 
+  const haFiltriAttivi = filtroMuscolo !== 'Tutti' || filtroDifficolta !== 'Tutti' || filtroAttrezzatura !== 'Tutti';
+
   return (
     <View style={styles.contenitore}>
-      {/* Barra di ricerca */}
-      <View style={styles.barraDiRicerca}>
-        <Ionicons name="search" size={18} color={Colors.textMuted} />
-        <TextInput
-          style={styles.campoDiRicerca}
-          placeholder="Cerca per nome o muscolo..."
-          placeholderTextColor={Colors.textMuted}
-          value={search}
-          onChangeText={setSearch}
-        />
-        {search.length > 0 && (
-          <TouchableOpacity onPress={() => setSearch('')}>
-            <Ionicons name="close-circle" size={18} color={Colors.textMuted} />
-          </TouchableOpacity>
-        )}
+      {/* Barra di ricerca e Toggle Filtri */}
+      <View style={styles.rigaRicercaEBottoni}>
+        <View style={styles.barraDiRicerca}>
+          <Ionicons name="search" size={18} color={Colors.textMuted} />
+          <TextInput
+            style={styles.campoDiRicerca}
+            placeholder="Cerca esercizio o muscolo..."
+            placeholderTextColor={Colors.textMuted}
+            value={search}
+            onChangeText={setSearch}
+          />
+          {search.length > 0 && (
+            <TouchableOpacity onPress={() => setSearch('')}>
+              <Ionicons name="close-circle" size={18} color={Colors.textMuted} />
+            </TouchableOpacity>
+          )}
+        </View>
+        <TouchableOpacity
+          style={[styles.bottoneFiltri, (mostraFiltri || haFiltriAttivi) && styles.bottoneFiltriAttivo]}
+          onPress={() => setMostraFiltri(!mostraFiltri)}
+        >
+          <Ionicons name="funnel-outline" size={20} color={mostraFiltri || haFiltriAttivi ? '#fff' : Colors.textSecondary} />
+        </TouchableOpacity>
       </View>
 
-      {/* Filtri per gruppo muscolare */}
-      <FlatList
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        data={MUSCLE_GROUPS}
-        keyExtractor={(item) => item}
-        style={styles.rigaFiltri}
-        contentContainerStyle={{ paddingHorizontal: Spacing.md, gap: 8 }}
-        renderItem={({ item }) => (
-          <TouchableOpacity
-            style={[
-              styles.chipFiltro,
-              filtroMuscolo === item && styles.chipFiltroAttivo,
-            ]}
-            onPress={() => setFiltroMuscolo(item)}
-          >
-            <Text
-              style={[
-                styles.testoChipFiltro,
-                filtroMuscolo === item && styles.testoChipFiltroAttivo,
-              ]}
+      {/* Pannello Filtri Espandibile */}
+      {mostraFiltri && (
+        <View style={styles.pannelloFiltri}>
+          <ScrollView showsVerticalScrollIndicator={false} style={{ maxHeight: 180 }}>
+            {/* Gruppo Muscolare */}
+            <Text style={styles.etichettaSezioneFiltri}>Gruppo Muscolare</Text>
+            <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.scrollFiltriRow}>
+              {MUSCLE_GROUPS.map((item) => (
+                <TouchableOpacity
+                  key={item}
+                  style={[styles.chipFiltro, filtroMuscolo === item && styles.chipFiltroAttivo]}
+                  onPress={() => setFiltroMuscolo(item)}
+                >
+                  <Text style={[styles.testoChipFiltro, filtroMuscolo === item && styles.testoChipFiltroAttivo]}>{item}</Text>
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
+
+            {/* Difficoltà */}
+            <Text style={styles.etichettaSezioneFiltri}>Difficoltà</Text>
+            <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.scrollFiltriRow}>
+              {DIFFICOLTA_FILTRI.map((item) => (
+                <TouchableOpacity
+                  key={item}
+                  style={[styles.chipFiltro, filtroDifficolta === item && styles.chipFiltroAttivo]}
+                  onPress={() => setFiltroDifficolta(item)}
+                >
+                  <Text style={[styles.testoChipFiltro, filtroDifficolta === item && styles.testoChipFiltroAttivo]}>{item}</Text>
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
+
+            {/* Attrezzatura */}
+            <Text style={styles.etichettaSezioneFiltri}>Attrezzatura</Text>
+            <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.scrollFiltriRow}>
+              {ATTREZZATURA_FILTRI.map((item) => (
+                <TouchableOpacity
+                  key={item}
+                  style={[styles.chipFiltro, filtroAttrezzatura === item && styles.chipFiltroAttivo]}
+                  onPress={() => setFiltroAttrezzatura(item)}
+                >
+                  <Text style={[styles.testoChipFiltro, filtroAttrezzatura === item && styles.testoChipFiltroAttivo]}>{item}</Text>
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
+          </ScrollView>
+
+          {/* Reset button */}
+          {haFiltriAttivi && (
+            <TouchableOpacity
+              style={styles.pulsanteReset}
+              onPress={() => {
+                setFiltroMuscolo('Tutti');
+                setFiltroDifficolta('Tutti');
+                setFiltroAttrezzatura('Tutti');
+              }}
             >
-              {item}
-            </Text>
-          </TouchableOpacity>
-        )}
-      />
+              <Text style={styles.testoReset}>Resetta Filtri</Text>
+            </TouchableOpacity>
+          )}
+        </View>
+      )}
 
       {/* Lista esercizi */}
       <FlatList
@@ -153,6 +215,7 @@ export default function ExercisesScreen() {
           <View style={styles.statoVuoto}>
             <Ionicons name="barbell-outline" size={48} color={Colors.textMuted} />
             <Text style={styles.testoStatoVuoto}>Nessun esercizio trovato</Text>
+            <Text style={styles.sottotestoStatoVuoto}>Prova ad allentare i filtri di ricerca</Text>
           </View>
         }
       />
@@ -171,16 +234,15 @@ export default function ExercisesScreen() {
 
 const styles = StyleSheet.create({
   contenitore: { flex: 1, backgroundColor: Colors.background },
-
+  rigaRicercaEBottoni: { flexDirection: 'row', padding: Spacing.md, paddingBottom: Spacing.sm, gap: Spacing.sm, alignItems: 'center' },
   barraDiRicerca: {
+    flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: Colors.surface,
-    margin: Spacing.md,
-    marginBottom: Spacing.sm,
     borderRadius: Radius.md,
     paddingHorizontal: Spacing.md,
-    paddingVertical: Spacing.sm,
+    height: 46,
     gap: 8,
     borderWidth: 1,
     borderColor: Colors.border,
@@ -190,16 +252,46 @@ const styles = StyleSheet.create({
     fontSize: FontSize.md,
     color: Colors.textPrimary,
   },
-
-  rigaFiltri: {
-    flexGrow: 0,
-    marginBottom: Spacing.sm,
+  bottoneFiltri: {
+    backgroundColor: Colors.surface,
+    width: 46,
+    height: 46,
+    borderRadius: Radius.md,
+    borderWidth: 1,
+    borderColor: Colors.border,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  bottoneFiltriAttivo: {
+    backgroundColor: Colors.primary,
+    borderColor: Colors.primary,
+  },
+  pannelloFiltri: {
+    backgroundColor: Colors.surface,
+    borderBottomWidth: 1,
+    borderBottomColor: Colors.border,
+    paddingHorizontal: Spacing.md,
+    paddingBottom: Spacing.md,
+    gap: Spacing.xs,
+  },
+  etichettaSezioneFiltri: {
+    fontSize: 11,
+    fontWeight: 'bold',
+    color: Colors.textSecondary,
+    textTransform: 'uppercase',
+    marginTop: Spacing.sm,
+    marginBottom: Spacing.xs,
+    letterSpacing: 0.5,
+  },
+  scrollFiltriRow: {
+    gap: 6,
+    paddingBottom: Spacing.xs,
   },
   chipFiltro: {
-    paddingVertical: 6,
-    paddingHorizontal: 14,
+    paddingVertical: 5,
+    paddingHorizontal: 12,
     borderRadius: Radius.full,
-    backgroundColor: Colors.surface,
+    backgroundColor: Colors.background,
     borderWidth: 1,
     borderColor: Colors.border,
   },
@@ -209,10 +301,23 @@ const styles = StyleSheet.create({
   },
   testoChipFiltro: {
     color: Colors.textSecondary,
-    fontSize: FontSize.sm,
+    fontSize: FontSize.xs,
     fontWeight: '600',
   },
   testoChipFiltroAttivo: { color: '#fff' },
+  pulsanteReset: {
+    alignSelf: 'center',
+    marginTop: Spacing.sm,
+    paddingVertical: 6,
+    paddingHorizontal: 16,
+    borderRadius: Radius.md,
+    backgroundColor: Colors.danger + '15',
+  },
+  testoReset: {
+    color: Colors.danger,
+    fontSize: FontSize.xs,
+    fontWeight: 'bold',
+  },
 
   contenutoLista: { padding: Spacing.md, gap: 12, paddingBottom: 100 },
 
@@ -268,8 +373,9 @@ const styles = StyleSheet.create({
   separatore: { fontSize: FontSize.xs, color: Colors.textMuted },
   muscoliSecondari: { fontSize: FontSize.xs, color: Colors.textMuted, flex: 1 },
 
-  statoVuoto: { alignItems: 'center', marginTop: 60, gap: 12 },
-  testoStatoVuoto: { color: Colors.textMuted, fontSize: FontSize.md },
+  statoVuoto: { alignItems: 'center', marginTop: 60, gap: 8 },
+  testoStatoVuoto: { color: Colors.textMuted, fontSize: FontSize.md, fontWeight: '600' },
+  sottotestoStatoVuoto: { color: Colors.textMuted, fontSize: FontSize.xs },
 
   pulisanteFlottante: {
     position: 'absolute',

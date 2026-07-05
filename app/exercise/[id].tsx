@@ -22,7 +22,7 @@ export default function ExerciseDetailScreen() {
   if (!esercizio) {
     return (
       <View style={styles.contenitore}>
-        <Stack.Screen options={{ title: 'Errore' }} />
+        <Stack.Screen options={{ title: 'Errore', headerBackTitle: 'back' }} />
         <Text style={styles.testoErrore}>Esercizio non trovato!</Text>
       </View>
     );
@@ -52,7 +52,9 @@ export default function ExerciseDetailScreen() {
     <ScrollView style={styles.contenitore} contentContainerStyle={styles.contenuto}>
       <Stack.Screen
         options={{
-          title: esercizio.name,
+          title: esercizio.name.length > 22 ? esercizio.name.slice(0, 19) + '...' : esercizio.name,
+          headerBackTitle: 'back',
+          headerTitleStyle: { fontSize: 16 },
           headerRight: () => (
             <TouchableOpacity
               onPress={() => router.push({ pathname: '/exercise/edit/[id]', params: { id: esercizio.id } })}

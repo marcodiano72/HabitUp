@@ -1,4 +1,4 @@
-// app/(tabs)/index.tsx — Dashboard Home (Light Mode Premium)
+// app/(tabs)/index.tsx — Dashboard Home (Premium Theme Blue & Green)
 import React from 'react';
 import {
   View,
@@ -6,10 +6,11 @@ import {
   StyleSheet,
   ScrollView,
   TouchableOpacity,
-  ImageBackground,
+  Image,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
 import { useHistoryStore } from '../../store/historyStore';
 import { useGoalStore } from '../../store/goalStore';
 import { useSessionStore } from '../../store/sessionStore';
@@ -47,33 +48,48 @@ export default function HomeScreen() {
     <ScrollView style={styles.container} contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
       {/* Intestazione Dashboard */}
       <View style={styles.header}>
-        <View>
+        <View style={{ flex: 1, marginRight: Spacing.sm }}>
           <Text style={styles.greeting}>{greeting}, Atleta! 👋</Text>
           <Text style={styles.date}>{todayFormatted}</Text>
         </View>
-        <TouchableOpacity style={styles.profileIcon}>
-          <Ionicons name="person-circle" size={48} color={Colors.primary} />
-        </TouchableOpacity>
+        <Image
+          source={require('../../assets/images/logo.png')}
+          style={styles.logoHeader}
+          resizeMode="contain"
+        />
       </View>
 
       {/* Hero Card: Prossimo Allenamento */}
-      <Text style={styles.sectionTitle}>In programma oggi</Text>
+      <View style={styles.sectionTitleRow}>
+        <Text style={styles.sectionTitle}>In programma oggi</Text>
+        <TouchableOpacity onPress={() => router.push('/session/list')}>
+          <Text style={styles.viewAllText}>Vedi Agenda →</Text>
+        </TouchableOpacity>
+      </View>
+
       {todayPlan ? (
         <TouchableOpacity
-          style={styles.heroCard}
+          style={styles.heroCardContainer}
           activeOpacity={0.9}
           onPress={() => router.push({ pathname: '/session/active/[id]', params: { id: todaySession!.id } })}
         >
-          <View style={styles.heroContent}>
-            <View style={styles.heroBadge}>
-              <Text style={styles.heroBadgeText}>PRONTO</Text>
+          <LinearGradient
+            colors={[Colors.primary, Colors.accent]}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+            style={styles.heroCardGradient}
+          >
+            <View style={styles.heroContent}>
+              <View style={styles.heroBadge}>
+                <Text style={styles.heroBadgeText}>PRONTO</Text>
+              </View>
+              <Text style={styles.heroTitle} numberOfLines={1}>{todayPlan.name}</Text>
+              <Text style={styles.heroSub}>{todayPlan.expectedDuration} min • {todayPlan.exercises.length} esercizi</Text>
             </View>
-            <Text style={styles.heroTitle}>{todayPlan.name}</Text>
-            <Text style={styles.heroSub}>{todayPlan.expectedDuration} min • {todayPlan.exercises.length} esercizi</Text>
-          </View>
-          <View style={styles.heroPlayBtn}>
-            <Ionicons name="play" size={24} color={Colors.primary} />
-          </View>
+            <View style={styles.heroPlayBtn}>
+              <Ionicons name="play" size={24} color={Colors.primary} />
+            </View>
+          </LinearGradient>
         </TouchableOpacity>
       ) : (
         <TouchableOpacity
@@ -89,26 +105,28 @@ export default function HomeScreen() {
         </TouchableOpacity>
       )}
 
-      {/* Azioni Rapide Circolari */}
+      {/* Azioni Rapide */}
+      <Text style={styles.sectionTitle}>Azioni rapide</Text>
       <View style={styles.quickActionsGrid}>
-        <QuickAction icon="barbell" label="Esercizi" color={Colors.accent} onPress={() => router.push('/exercise/create')} />
-        <QuickAction icon="document-text" label="Schede" color={Colors.warning} onPress={() => router.push('/plan/create')} />
-        <QuickAction icon="calendar" label="Pianifica" color={Colors.success} onPress={() => router.push('/session/create')} />
-        <QuickAction icon="trophy" label="Obiettivi" color={Colors.danger} onPress={() => router.push('/goal/create')} />
+        <QuickAction icon="barbell" label="Nuovo Eserc." color={Colors.primary} onPress={() => router.push('/exercise/create')} />
+        <QuickAction icon="document-text" label="Nuova Scheda" color={Colors.accent} onPress={() => router.push('/plan/create')} />
+        <QuickAction icon="calendar" label="Pianifica" color={Colors.primary} onPress={() => router.push('/session/create')} />
+        <QuickAction icon="trophy" label="Nuovo Obiett." color={Colors.accent} onPress={() => router.push('/goal/create')} />
       </View>
 
       {/* Riepilogo e Statistiche */}
+      <Text style={styles.sectionTitle}>Panoramica</Text>
       <View style={styles.statsContainer}>
         <View style={styles.statBox}>
-          <View style={[styles.statIconWrapper, { backgroundColor: Colors.primaryLight + '20' }]}>
+          <View style={[styles.statIconWrapper, { backgroundColor: Colors.primaryLight }]}>
             <Ionicons name="flame" size={24} color={Colors.primary} />
           </View>
           <Text style={styles.statValue}>{totalWorkouts}</Text>
-          <Text style={styles.statLabel}>Sessioni Totali</Text>
+          <Text style={styles.statLabel}>Allenamenti Totali</Text>
         </View>
         <View style={styles.statBox}>
-          <View style={[styles.statIconWrapper, { backgroundColor: Colors.warning + '20' }]}>
-            <Ionicons name="flag" size={24} color={Colors.warning} />
+          <View style={[styles.statIconWrapper, { backgroundColor: Colors.success + '22' }]}>
+            <Ionicons name="flag" size={24} color={Colors.accent} />
           </View>
           <Text style={styles.statValue}>{activeGoals}</Text>
           <Text style={styles.statLabel}>Obiettivi Attivi</Text>
@@ -118,7 +136,7 @@ export default function HomeScreen() {
       {/* Ultima Attività */}
       {lastWorkout && (
         <View style={styles.lastActivitySection}>
-          <Text style={styles.sectionTitle}>Ultima Attività</Text>
+          <Text style={styles.sectionTitle}>Ultimo Allenamento</Text>
           <View style={styles.lastActivityCard}>
             <View style={styles.activityIcon}>
               <Ionicons name="checkmark-done" size={20} color="#fff" />
@@ -144,11 +162,11 @@ export default function HomeScreen() {
 
 function QuickAction({ icon, label, color, onPress }: { icon: any; label: string; color: string; onPress: () => void }) {
   return (
-    <TouchableOpacity style={styles.quickActionItem} onPress={onPress}>
+    <TouchableOpacity style={styles.quickActionItem} onPress={onPress} activeOpacity={0.75}>
       <View style={[styles.quickActionCircle, { backgroundColor: color + '15' }]}>
-        <Ionicons name={icon} size={28} color={color} />
+        <Ionicons name={icon} size={26} color={color} />
       </View>
-      <Text style={styles.quickActionLabel}>{label}</Text>
+      <Text style={styles.quickActionLabel} numberOfLines={1}>{label}</Text>
     </TouchableOpacity>
   );
 }
@@ -158,48 +176,51 @@ const styles = StyleSheet.create({
   content: { padding: Spacing.md },
   
   // Header
-  header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: Spacing.xl, marginTop: Spacing.sm },
-  greeting: { fontSize: FontSize.xxxl, fontWeight: '800', color: Colors.textPrimary, letterSpacing: -0.5 },
-  date: { fontSize: FontSize.md, color: Colors.textSecondary, fontWeight: '500', marginTop: 2, textTransform: 'capitalize' },
-  profileIcon: { ...Shadow.sm },
+  header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: Spacing.lg, marginTop: Spacing.sm },
+  greeting: { fontSize: FontSize.xxl, fontWeight: '800', color: Colors.textPrimary, letterSpacing: -0.5 },
+  date: { fontSize: FontSize.sm, color: Colors.textSecondary, fontWeight: '500', marginTop: 2, textTransform: 'capitalize' },
+  logoHeader: { width: 120, height: 120 },
 
-  sectionTitle: { fontSize: FontSize.lg, fontWeight: '700', color: Colors.textPrimary, marginBottom: Spacing.sm, letterSpacing: -0.3 },
+  sectionTitle: { fontSize: FontSize.md, fontWeight: '700', color: Colors.textPrimary, marginBottom: Spacing.sm, textTransform: 'uppercase', letterSpacing: 0.5 },
+  sectionTitleRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: Spacing.sm },
+  viewAllText: { fontSize: FontSize.sm, color: Colors.primary, fontWeight: '600' },
 
-  // Hero Card
-  heroCard: { backgroundColor: Colors.primary, borderRadius: Radius.xl, padding: Spacing.xl, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: Spacing.xl, ...Shadow.lg },
-  heroContent: { flex: 1 },
-  heroBadge: { backgroundColor: 'rgba(255,255,255,0.2)', alignSelf: 'flex-start', paddingHorizontal: 10, paddingVertical: 4, borderRadius: Radius.full, marginBottom: 8 },
-  heroBadgeText: { color: '#fff', fontSize: FontSize.xs, fontWeight: 'bold', letterSpacing: 1 },
-  heroTitle: { fontSize: FontSize.xxl, fontWeight: '800', color: '#fff', marginBottom: 4 },
-  heroSub: { fontSize: FontSize.md, color: 'rgba(255,255,255,0.8)', fontWeight: '500' },
-  heroPlayBtn: { width: 56, height: 56, borderRadius: 28, backgroundColor: '#fff', alignItems: 'center', justifyContent: 'center', ...Shadow.md },
+  // Hero Card Gradient
+  heroCardContainer: { borderRadius: Radius.xl, overflow: 'hidden', marginBottom: Spacing.lg, ...Shadow.md },
+  heroCardGradient: { padding: Spacing.xl, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+  heroContent: { flex: 1, marginRight: Spacing.md },
+  heroBadge: { backgroundColor: 'rgba(255,255,255,0.25)', alignSelf: 'flex-start', paddingHorizontal: 10, paddingVertical: 4, borderRadius: Radius.full, marginBottom: 8 },
+  heroBadgeText: { color: '#fff', fontSize: 10, fontWeight: '800', letterSpacing: 1 },
+  heroTitle: { fontSize: FontSize.xl, fontWeight: '800', color: '#fff', marginBottom: 2 },
+  heroSub: { fontSize: FontSize.sm, color: 'rgba(255,255,255,0.85)', fontWeight: '600' },
+  heroPlayBtn: { width: 50, height: 50, borderRadius: 25, backgroundColor: '#fff', alignItems: 'center', justifyContent: 'center', ...Shadow.sm },
 
-  heroEmptyCard: { backgroundColor: Colors.surface, borderRadius: Radius.xl, padding: Spacing.xl, alignItems: 'center', justifyContent: 'center', marginBottom: Spacing.xl, borderWidth: 1, borderColor: Colors.border, borderStyle: 'dashed' },
-  heroEmptyIcon: { width: 64, height: 64, borderRadius: 32, backgroundColor: Colors.primaryLight + '20', alignItems: 'center', justifyContent: 'center', marginBottom: 12 },
-  heroEmptyTitle: { fontSize: FontSize.lg, fontWeight: 'bold', color: Colors.textPrimary, marginBottom: 4 },
-  heroEmptySub: { fontSize: FontSize.sm, color: Colors.textSecondary },
+  heroEmptyCard: { backgroundColor: Colors.surface, borderRadius: Radius.xl, padding: Spacing.xl, alignItems: 'center', justifyContent: 'center', marginBottom: Spacing.lg, borderWidth: 1, borderColor: Colors.border, borderStyle: 'dashed' },
+  heroEmptyIcon: { width: 60, height: 60, borderRadius: 30, backgroundColor: Colors.primaryLight, alignItems: 'center', justifyContent: 'center', marginBottom: 12 },
+  heroEmptyTitle: { fontSize: FontSize.md, fontWeight: 'bold', color: Colors.textPrimary, marginBottom: 4 },
+  heroEmptySub: { fontSize: FontSize.xs, color: Colors.textSecondary },
 
-  // Quick Actions
-  quickActionsGrid: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: Spacing.xl, paddingHorizontal: 4 },
+  // Quick Actions Grid
+  quickActionsGrid: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: Spacing.lg, backgroundColor: Colors.surface, borderRadius: Radius.lg, padding: Spacing.md, borderWidth: 1, borderColor: Colors.border, ...Shadow.sm },
   quickActionItem: { alignItems: 'center', width: '22%' },
-  quickActionCircle: { width: 60, height: 60, borderRadius: 30, alignItems: 'center', justifyContent: 'center', marginBottom: 8 },
+  quickActionCircle: { width: 50, height: 50, borderRadius: 25, alignItems: 'center', justifyContent: 'center', marginBottom: 6 },
   quickActionLabel: { fontSize: FontSize.xs, fontWeight: '600', color: Colors.textSecondary },
 
   // Stats
-  statsContainer: { flexDirection: 'row', gap: Spacing.md, marginBottom: Spacing.xl },
-  statBox: { flex: 1, backgroundColor: Colors.surface, borderRadius: Radius.lg, padding: Spacing.lg, alignItems: 'center', ...Shadow.sm, borderWidth: 1, borderColor: Colors.border },
-  statIconWrapper: { width: 48, height: 48, borderRadius: 24, alignItems: 'center', justifyContent: 'center', marginBottom: 12 },
-  statValue: { fontSize: FontSize.xxxl, fontWeight: '800', color: Colors.textPrimary, marginBottom: 2 },
-  statLabel: { fontSize: FontSize.sm, color: Colors.textSecondary, fontWeight: '500' },
+  statsContainer: { flexDirection: 'row', gap: Spacing.md, marginBottom: Spacing.lg },
+  statBox: { flex: 1, backgroundColor: Colors.surface, borderRadius: Radius.lg, padding: Spacing.md, alignItems: 'center', ...Shadow.sm, borderWidth: 1, borderColor: Colors.border },
+  statIconWrapper: { width: 44, height: 44, borderRadius: 22, alignItems: 'center', justifyContent: 'center', marginBottom: 8 },
+  statValue: { fontSize: FontSize.xxl, fontWeight: '800', color: Colors.textPrimary, marginBottom: 2 },
+  statLabel: { fontSize: FontSize.xs, color: Colors.textSecondary, fontWeight: '600', textAlign: 'center' },
 
   // Last Activity
   lastActivitySection: { marginBottom: Spacing.md },
   lastActivityCard: { flexDirection: 'row', backgroundColor: Colors.surface, borderRadius: Radius.lg, padding: Spacing.md, alignItems: 'center', ...Shadow.sm, borderWidth: 1, borderColor: Colors.border },
-  activityIcon: { width: 40, height: 40, borderRadius: 20, backgroundColor: Colors.success, alignItems: 'center', justifyContent: 'center', marginRight: 12 },
+  activityIcon: { width: 40, height: 40, borderRadius: 20, backgroundColor: Colors.accent, alignItems: 'center', justifyContent: 'center', marginRight: 12 },
   activityInfo: { flex: 1 },
   activityTitle: { fontSize: FontSize.md, fontWeight: '700', color: Colors.textPrimary, marginBottom: 2 },
-  activityDate: { fontSize: FontSize.sm, color: Colors.textSecondary },
+  activityDate: { fontSize: FontSize.xs, color: Colors.textSecondary },
   activityRpe: { alignItems: 'center', paddingLeft: 12, borderLeftWidth: 1, borderLeftColor: Colors.border },
-  activityRpeValue: { fontSize: FontSize.lg, fontWeight: '800', color: Colors.textPrimary },
-  activityRpeLabel: { fontSize: FontSize.xs, color: Colors.textMuted, fontWeight: '600' },
+  activityRpeValue: { fontSize: FontSize.md, fontWeight: '800', color: Colors.textPrimary },
+  activityRpeLabel: { fontSize: 10, color: Colors.textMuted, fontWeight: '600' },
 });

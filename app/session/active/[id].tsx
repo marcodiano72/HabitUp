@@ -57,7 +57,7 @@ export default function ActiveSessionScreen() {
   if (!sessione || !piano) {
     return (
       <View style={{ flex: 1, backgroundColor: Colors.background, justifyContent: 'center', alignItems: 'center' }}>
-        <Stack.Screen options={{ title: 'Errore' }} />
+        <Stack.Screen options={{ title: 'Errore', headerBackTitle: 'back' }} />
         <Text style={{ color: Colors.danger }}>Sessione non trovata</Text>
         <TouchableOpacity onPress={() => router.back()} style={{ marginTop: 20 }}>
           <Text style={{ color: Colors.primary }}>← Torna indietro</Text>
@@ -137,7 +137,7 @@ export default function ActiveSessionScreen() {
     const durata = Math.round((new Date().getTime() - oraInizio.getTime()) / 60000);
     return (
       <View style={styles.schermataConclusione}>
-        <Stack.Screen options={{ title: 'Completato!', headerLeft: () => null }} />
+        <Stack.Screen options={{ title: 'Completato!', headerLeft: () => null, headerBackTitle: 'back' }} />
         <Ionicons name="trophy" size={80} color={Colors.warning} />
         <Text style={styles.titoloConcluso}>Allenamento completato!</Text>
         <Text style={styles.riepilogoConcluso}>Durata: {durata} min · {registrazioni.length} esercizi</Text>
@@ -165,7 +165,7 @@ export default function ActiveSessionScreen() {
 
   return (
     <View style={styles.contenitore}>
-      <Stack.Screen options={{ title: piano.name }} />
+      <Stack.Screen options={{ title: piano.name, headerBackTitle: 'back' }} />
 
       {/* Barra di progresso globale */}
       <View style={styles.barraProgressoGlobale}>

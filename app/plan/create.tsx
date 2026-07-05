@@ -61,7 +61,7 @@ export default function CreatePlanScreen() {
 
   return (
     <ScrollView style={styles.contenitore} contentContainerStyle={styles.contenuto}>
-      <Stack.Screen options={{ title: 'Nuova Scheda' }} />
+      <Stack.Screen options={{ title: 'Nuova Scheda', headerBackTitle: 'back' }} />
 
       <View style={styles.gruppoCampo}>
         <Text style={styles.etichetta}>Nome Scheda *</Text>

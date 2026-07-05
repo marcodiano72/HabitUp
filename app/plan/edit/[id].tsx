@@ -57,7 +57,7 @@ export default function EditPlanScreen() {
 
   return (
     <ScrollView style={styles.contenitore} contentContainerStyle={styles.contenuto}>
-      <Stack.Screen options={{ title: 'Modifica Scheda' }} />
+      <Stack.Screen options={{ title: 'Modifica Scheda', headerBackTitle: 'back' }} />
 
       <View style={styles.gruppoCampo}>
         <Text style={styles.etichetta}>Nome *</Text>

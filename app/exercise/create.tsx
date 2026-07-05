@@ -45,7 +45,7 @@ export default function CreateExerciseScreen() {
 
   return (
     <ScrollView style={styles.contenitore} contentContainerStyle={styles.contenuto}>
-      <Stack.Screen options={{ title: 'Nuovo Esercizio' }} />
+      <Stack.Screen options={{ title: 'Nuovo Esercizio', headerBackTitle: 'back' }} />
 
       <CampoTesto etichetta="Nome Esercizio *" valore={nome} onChange={setNome} placeholder="es. Panca Piana" />
       <CampoTesto etichetta="Gruppo Muscolare Principale *" valore={muscoloPrincipale} onChange={setMuscoloPrincipale} placeholder="es. Pettorali" />

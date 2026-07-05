@@ -36,6 +36,7 @@ export default function PlanDetailScreen() {
       <Stack.Screen
         options={{
           title: piano.name,
+          headerBackTitle: 'back',
           headerRight: () => (
             <TouchableOpacity onPress={() => router.push({ pathname: '/plan/edit/[id]', params: { id: piano.id } })} style={{ marginRight: 8 }}>
               <Ionicons name="pencil" size={20} color={Colors.primary} />

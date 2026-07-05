@@ -1,6 +1,6 @@
-// app/(tabs)/goals.tsx — Obiettivi Fisici
-import React from 'react';
-import { View, Text, StyleSheet, FlatList, TouchableOpacity, Alert } from 'react-native';
+// app/(tabs)/goals.tsx — Obiettivi Fisici con Filtri di Stato
+import React, { useState, useMemo } from 'react';
+import { View, Text, StyleSheet, FlatList, TouchableOpacity, Alert, ScrollView } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useGoalStore } from '../../store/goalStore';
@@ -13,10 +13,18 @@ const CONFIGURAZIONE_STATO = {
   Abbandonato: { colore: Colors.textMuted, icona: 'close-circle-outline' as const, etichetta: 'Abbandonato' },
 };
 
+const STATI_FILTRI = ['Tutti', 'Attivo', 'Completato', 'Abbandonato'];
+
 export default function GoalsScreen() {
   const router = useRouter();
   const goals = useGoalStore((s) => s.goals);
   const deleteGoal = useGoalStore((s) => s.deleteGoal);
+
+  const [filtroStato, setFiltroStato] = useState('Tutti');
+
+  const obiettiviFiltrati = useMemo(() => {
+    return goals.filter((g) => filtroStato === 'Tutti' || g.status === filtroStato);
+  }, [goals, filtroStato]);
 
   const handlePressLungo = (obiettivo: Goal) => {
     Alert.alert(obiettivo.title, 'Cosa vuoi fare?', [
@@ -82,6 +90,21 @@ export default function GoalsScreen() {
 
   return (
     <View style={styles.contenitore}>
+      {/* Sezione Filtri in alto */}
+      <View style={styles.sezioneFiltri}>
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.scrollFiltriRow}>
+          {STATI_FILTRI.map((item) => (
+            <TouchableOpacity
+              key={item}
+              style={[styles.chipFiltro, filtroStato === item && styles.chipFiltroAttivo]}
+              onPress={() => setFiltroStato(item)}
+            >
+              <Text style={[styles.testoChipFiltro, filtroStato === item && styles.testoChipFiltroAttivo]}>{item}</Text>
+            </TouchableOpacity>
+          ))}
+        </ScrollView>
+      </View>
+
       {goals.length > 0 && (
         <View style={styles.rigaRiepilogo}>
           <View style={styles.chipRiepilogo}>
@@ -94,16 +117,17 @@ export default function GoalsScreen() {
           </View>
         </View>
       )}
+
       <FlatList
-        data={goals}
+        data={obiettiviFiltrati}
         keyExtractor={(item) => item.id}
         renderItem={renderCardObiettivo}
         contentContainerStyle={styles.contenutoLista}
         ListEmptyComponent={
           <View style={styles.statoVuoto}>
             <Ionicons name="trophy-outline" size={48} color={Colors.textMuted} />
-            <Text style={styles.testoStatoVuoto}>Nessun obiettivo impostato</Text>
-            <Text style={styles.sottotestoStatoVuoto}>Tocca + per aggiungere il primo</Text>
+            <Text style={styles.testoStatoVuoto}>Nessun obiettivo trovato</Text>
+            <Text style={styles.sottotestoStatoVuoto}>Prova a modificare il filtro o inseriscine uno nuovo</Text>
           </View>
         }
       />
@@ -116,6 +140,27 @@ export default function GoalsScreen() {
 
 const styles = StyleSheet.create({
   contenitore: { flex: 1, backgroundColor: Colors.background },
+  sezioneFiltri: { backgroundColor: Colors.surface, paddingVertical: Spacing.sm, borderBottomWidth: 1, borderBottomColor: Colors.border },
+  scrollFiltriRow: { gap: 8, paddingHorizontal: Spacing.md },
+  chipFiltro: {
+    paddingVertical: 6,
+    paddingHorizontal: 14,
+    borderRadius: Radius.full,
+    backgroundColor: Colors.background,
+    borderWidth: 1,
+    borderColor: Colors.border,
+  },
+  chipFiltroAttivo: {
+    backgroundColor: Colors.primary,
+    borderColor: Colors.primary,
+  },
+  testoChipFiltro: {
+    color: Colors.textSecondary,
+    fontSize: FontSize.sm,
+    fontWeight: '600',
+  },
+  testoChipFiltroAttivo: { color: '#fff' },
+
   rigaRiepilogo: { flexDirection: 'row', padding: Spacing.md, paddingBottom: 0, gap: 8 },
   chipRiepilogo: { flexDirection: 'row', alignItems: 'center', gap: 6, backgroundColor: Colors.surface, borderRadius: Radius.full, paddingVertical: 6, paddingHorizontal: 12, borderWidth: 1, borderColor: Colors.border },
   testoRiepilogo: { fontSize: FontSize.sm, color: Colors.textSecondary, fontWeight: '600' },

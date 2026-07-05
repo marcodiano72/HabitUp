@@ -11,6 +11,7 @@ interface HistoryState {
   isHydrated: boolean;
   hydrate: () => Promise<void>;
   addSession: (session: WorkoutSession) => Promise<void>;
+  updateSession: (session: WorkoutSession) => Promise<void>;
   deleteSession: (id: string) => Promise<void>;
 }
 
@@ -34,6 +35,12 @@ export const useHistoryStore = create<HistoryState>((set, get) => ({
 
   addSession: async (session) => {
     const updated = [session, ...get().history];
+    set({ history: updated });
+    await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
+  },
+
+  updateSession: async (session) => {
+    const updated = get().history.map((s) => (s.id === session.id ? session : s));
     set({ history: updated });
     await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
   },

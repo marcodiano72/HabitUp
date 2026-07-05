@@ -1,25 +1,45 @@
-// app/session/create.tsx — Pianifica Sessione
-import React, { useState } from 'react';
-import {
-  View, Text, TextInput, StyleSheet, ScrollView,
-  TouchableOpacity, Alert,
-} from 'react-native';
-import { useRouter, Stack } from 'expo-router';
+// app/session/edit/[id].tsx — Modifica Sessione Pianificata
+import React, { useState, useEffect } from 'react';
+import { View, Text, TextInput, StyleSheet, ScrollView, TouchableOpacity, Alert } from 'react-native';
+import { useRouter, useLocalSearchParams, Stack } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import { useSessionStore } from '../../store/sessionStore';
-import { useWorkoutPlanStore } from '../../store/workoutPlanStore';
-import { PlannedSession } from '../../models/types';
-import { Colors, Spacing, Radius, FontSize, Shadow } from '../../constants/theme';
+import { useSessionStore } from '../../../store/sessionStore';
+import { useWorkoutPlanStore } from '../../../store/workoutPlanStore';
+import { PlannedSession } from '../../../models/types';
+import { Colors, Spacing, Radius, FontSize, Shadow } from '../../../constants/theme';
 
-export default function CreateSessionScreen() {
+export default function EditSessionScreen() {
+  const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
-  const addSession = useSessionStore((s) => s.addSession);
+  const sessions = useSessionStore((s) => s.sessions);
+  const updateSession = useSessionStore((s) => s.updateSession);
   const plans = useWorkoutPlanStore((s) => s.plans);
 
-  const todayStr = new Date().toISOString().split('T')[0];
-  const [selectedPlanId, setSelectedPlanId] = useState(plans[0]?.id ?? '');
-  const [date, setDate] = useState(todayStr);
+  const session = sessions.find((s) => s.id === id);
+
+  const [selectedPlanId, setSelectedPlanId] = useState('');
+  const [date, setDate] = useState('');
   const [notes, setNotes] = useState('');
+
+  useEffect(() => {
+    if (session) {
+      setSelectedPlanId(session.planId);
+      setDate(session.scheduledDate);
+      setNotes(session.notes ?? '');
+    }
+  }, [session]);
+
+  if (!session) {
+    return (
+      <View style={{ flex: 1, backgroundColor: Colors.background, justifyContent: 'center', alignItems: 'center' }}>
+        <Stack.Screen options={{ title: 'Errore', headerBackTitleVisible: false } as any} />
+        <Text style={{ color: Colors.danger }}>Sessione non trovata</Text>
+        <TouchableOpacity onPress={() => router.back()} style={{ marginTop: 20 }}>
+          <Text style={{ color: Colors.primary }}>← Torna indietro</Text>
+        </TouchableOpacity>
+      </View>
+    );
+  }
 
   const handleSave = async () => {
     if (!selectedPlanId) { Alert.alert('Errore', 'Seleziona una scheda.'); return; }
@@ -27,20 +47,20 @@ export default function CreateSessionScreen() {
       Alert.alert('Errore', 'Formato data non valido. Usa AAAA-MM-GG.');
       return;
     }
-    const session: PlannedSession = {
-      id: Date.now().toString(),
+
+    const updated: PlannedSession = {
+      ...session,
       planId: selectedPlanId,
       scheduledDate: date,
-      status: 'planned',
       notes: notes.trim() || undefined,
     };
-    await addSession(session);
+    await updateSession(updated);
     router.back();
   };
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
-      <Stack.Screen options={{ title: 'Pianifica Sessione', headerBackTitle: 'back' }} />
+      <Stack.Screen options={{ title: 'Modifica Sessione', headerBackTitle: 'back' }} />
 
       {/* Selezione scheda */}
       <View style={styles.fieldGroup}>
@@ -49,9 +69,6 @@ export default function CreateSessionScreen() {
           <View style={styles.noPlansBox}>
             <Ionicons name="warning-outline" size={24} color={Colors.warning} />
             <Text style={styles.noPlansText}>Nessuna scheda disponibile.</Text>
-            <TouchableOpacity onPress={() => { router.back(); router.push('/plan/create'); }}>
-              <Text style={styles.noPlansLink}>Crea una scheda →</Text>
-            </TouchableOpacity>
           </View>
         ) : (
           plans.map((p) => (
@@ -102,8 +119,8 @@ export default function CreateSessionScreen() {
       </View>
 
       <TouchableOpacity style={styles.saveBtn} onPress={handleSave}>
-        <Ionicons name="calendar-outline" size={20} color="#fff" />
-        <Text style={styles.saveBtnText}>Pianifica</Text>
+        <Ionicons name="save-outline" size={20} color="#fff" />
+        <Text style={styles.saveBtnText}>Salva Modifiche</Text>
       </TouchableOpacity>
       <View style={{ height: 40 }} />
     </ScrollView>
@@ -124,7 +141,6 @@ const styles = StyleSheet.create({
   planMeta: { fontSize: FontSize.sm, color: Colors.textSecondary, marginTop: 2 },
   noPlansBox: { alignItems: 'center', backgroundColor: Colors.surface, borderRadius: Radius.md, padding: Spacing.lg, gap: 8, borderWidth: 1, borderColor: Colors.border },
   noPlansText: { color: Colors.textSecondary, fontSize: FontSize.md },
-  noPlansLink: { color: Colors.primary, fontWeight: '600', fontSize: FontSize.md },
   saveBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, backgroundColor: Colors.primary, padding: Spacing.md, borderRadius: Radius.md, ...Shadow.md },
   saveBtnText: { color: '#fff', fontSize: FontSize.lg, fontWeight: 'bold' },
 });
