@@ -1,6 +1,6 @@
 // store/historyStore.ts
 import { create } from 'zustand';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { StorageService } from '../services/storageService';
 import { WorkoutSession } from '../models/types';
 import { MOCK_SESSIONS } from '../models/mockData';
 
@@ -21,11 +21,11 @@ export const useHistoryStore = create<HistoryState>((set, get) => ({
 
   hydrate: async () => {
     try {
-      const raw = await AsyncStorage.getItem(STORAGE_KEY);
-      if (raw) {
-        set({ history: JSON.parse(raw), isHydrated: true });
+      const data = await StorageService.get<WorkoutSession[]>(STORAGE_KEY);
+      if (data) {
+        set({ history: data, isHydrated: true });
       } else {
-        await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(MOCK_SESSIONS));
+        await StorageService.set(STORAGE_KEY, MOCK_SESSIONS);
         set({ history: MOCK_SESSIONS, isHydrated: true });
       }
     } catch {
@@ -36,18 +36,18 @@ export const useHistoryStore = create<HistoryState>((set, get) => ({
   addSession: async (session) => {
     const updated = [session, ...get().history];
     set({ history: updated });
-    await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
+    await StorageService.set(STORAGE_KEY, updated);
   },
 
   updateSession: async (session) => {
     const updated = get().history.map((s) => (s.id === session.id ? session : s));
     set({ history: updated });
-    await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
+    await StorageService.set(STORAGE_KEY, updated);
   },
 
   deleteSession: async (id) => {
     const updated = get().history.filter((s) => s.id !== id);
     set({ history: updated });
-    await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
+    await StorageService.set(STORAGE_KEY, updated);
   },
 }));

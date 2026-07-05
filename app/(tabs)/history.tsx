@@ -8,6 +8,13 @@ import { useHistoryStore } from '../../store/historyStore';
 import { useExerciseStore } from '../../store/exerciseStore';
 import { WorkoutSession } from '../../models/types';
 import { Colors, Spacing, Radius, FontSize, Shadow } from '../../constants/theme';
+import {
+  calculateTotalMinutes,
+  calculateAverageRPE,
+  formatDurationChartData,
+  formatRPEChartData,
+  formatMuscleVolumeChartData,
+} from '../../utils/statsHelpers';
 
 const { width: screenWidth } = Dimensions.get('window');
 
@@ -77,49 +84,13 @@ export default function HistoryScreen() {
     );
   };
 
-  const minutiTotali = history.reduce((acc, s) => acc + s.duration, 0);
-  const affaticamentoMedio = history.length > 0
-    ? (history.reduce((acc, s) => acc + s.fatigueLevel, 0) / history.length).toFixed(1)
-    : '—';
+  const minutiTotali = calculateTotalMinutes(history);
+  const affaticamentoMedio = calculateAverageRPE(history);
 
   // ──────── Preparazione Dati Grafici ────────
-  const datiUltimeSessioni = [...history].slice(0, 6).reverse();
-
-  const datiDurata = datiUltimeSessioni.map((s) => {
-    const d = new Date(s.date);
-    return {
-      value: s.duration,
-      label: d.toLocaleDateString('it-IT', { day: 'numeric', month: 'short' }),
-      frontColor: Colors.primary,
-    };
-  });
-
-  const datiFatica = datiUltimeSessioni.map((s) => {
-    const d = new Date(s.date);
-    return {
-      value: s.fatigueLevel,
-      label: d.toLocaleDateString('it-IT', { day: 'numeric' }),
-      dataPointText: `RPE ${s.fatigueLevel}`,
-      frontColor: Colors.accent,
-    };
-  });
-
-  const conteggioGruppiMuscolari: Record<string, number> = {};
-  history.forEach((sessione) => {
-    sessione.exercisesDone.forEach((exDone) => {
-      const exDetail = exercises.find((e) => e.id === exDone.exerciseId);
-      if (exDetail) {
-        const muscle = exDetail.primaryMuscle;
-        conteggioGruppiMuscolari[muscle] = (conteggioGruppiMuscolari[muscle] || 0) + exDone.sets;
-      }
-    });
-  });
-
-  const datiGruppiMuscolari = Object.keys(conteggioGruppiMuscolari).map((muscolo) => ({
-    value: conteggioGruppiMuscolari[muscolo],
-    label: muscolo.substring(0, 6),
-    frontColor: Colors.accent,
-  }));
+  const datiDurata = formatDurationChartData(history, Colors.primary);
+  const datiFatica = formatRPEChartData(history, Colors.accent);
+  const datiGruppiMuscolari = formatMuscleVolumeChartData(history, exercises, Colors.accent);
 
   const renderAnalisiGrafica = () => {
     if (history.length === 0) return null;

@@ -1,6 +1,6 @@
 // store/workoutPlanStore.ts
 import { create } from 'zustand';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { StorageService } from '../services/storageService';
 import { WorkoutPlan } from '../models/types';
 import { MOCK_PLANS } from '../models/mockData';
 
@@ -22,11 +22,11 @@ export const useWorkoutPlanStore = create<WorkoutPlanState>((set, get) => ({
 
   hydrate: async () => {
     try {
-      const raw = await AsyncStorage.getItem(STORAGE_KEY);
-      if (raw) {
-        set({ plans: JSON.parse(raw), isHydrated: true });
+      const data = await StorageService.get<WorkoutPlan[]>(STORAGE_KEY);
+      if (data) {
+        set({ plans: data, isHydrated: true });
       } else {
-        await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(MOCK_PLANS));
+        await StorageService.set(STORAGE_KEY, MOCK_PLANS);
         set({ plans: MOCK_PLANS, isHydrated: true });
       }
     } catch {
@@ -37,19 +37,19 @@ export const useWorkoutPlanStore = create<WorkoutPlanState>((set, get) => ({
   addPlan: async (plan) => {
     const updated = [...get().plans, plan];
     set({ plans: updated });
-    await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
+    await StorageService.set(STORAGE_KEY, updated);
   },
 
   updatePlan: async (plan) => {
     const updated = get().plans.map((p) => (p.id === plan.id ? plan : p));
     set({ plans: updated });
-    await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
+    await StorageService.set(STORAGE_KEY, updated);
   },
 
   deletePlan: async (id) => {
     const updated = get().plans.filter((p) => p.id !== id);
     set({ plans: updated });
-    await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
+    await StorageService.set(STORAGE_KEY, updated);
   },
 
   duplicatePlan: async (id) => {
@@ -62,6 +62,6 @@ export const useWorkoutPlanStore = create<WorkoutPlanState>((set, get) => ({
     };
     const updated = [...get().plans, duplicate];
     set({ plans: updated });
-    await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
+    await StorageService.set(STORAGE_KEY, updated);
   },
 }));

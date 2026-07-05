@@ -1,6 +1,6 @@
 // store/exerciseStore.ts
 import { create } from 'zustand';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { StorageService } from '../services/storageService';
 import { Exercise } from '../models/types';
 import { MOCK_EXERCISES } from '../models/mockData';
 
@@ -21,12 +21,12 @@ export const useExerciseStore = create<ExerciseState>((set, get) => ({
 
   hydrate: async () => {
     try {
-      const raw = await AsyncStorage.getItem(STORAGE_KEY);
-      if (raw) {
-        set({ exercises: JSON.parse(raw), isHydrated: true });
+      const data = await StorageService.get<Exercise[]>(STORAGE_KEY);
+      if (data) {
+        set({ exercises: data, isHydrated: true });
       } else {
         // Prima installazione: carichiamo i dati di esempio
-        await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(MOCK_EXERCISES));
+        await StorageService.set(STORAGE_KEY, MOCK_EXERCISES);
         set({ exercises: MOCK_EXERCISES, isHydrated: true });
       }
     } catch {
@@ -37,18 +37,18 @@ export const useExerciseStore = create<ExerciseState>((set, get) => ({
   addExercise: async (exercise) => {
     const updated = [...get().exercises, exercise];
     set({ exercises: updated });
-    await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
+    await StorageService.set(STORAGE_KEY, updated);
   },
 
   updateExercise: async (exercise) => {
     const updated = get().exercises.map((e) => (e.id === exercise.id ? exercise : e));
     set({ exercises: updated });
-    await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
+    await StorageService.set(STORAGE_KEY, updated);
   },
 
   deleteExercise: async (id) => {
     const updated = get().exercises.filter((e) => e.id !== id);
     set({ exercises: updated });
-    await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
+    await StorageService.set(STORAGE_KEY, updated);
   },
 }));

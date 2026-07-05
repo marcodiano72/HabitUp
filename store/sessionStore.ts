@@ -1,6 +1,6 @@
 // store/sessionStore.ts
 import { create } from 'zustand';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { StorageService } from '../services/storageService';
 import { PlannedSession } from '../models/types';
 import { MOCK_PLANNED_SESSIONS } from '../models/mockData';
 
@@ -24,11 +24,11 @@ export const useSessionStore = create<SessionState>((set, get) => ({
 
   hydrate: async () => {
     try {
-      const raw = await AsyncStorage.getItem(STORAGE_KEY);
-      if (raw) {
-        set({ sessions: JSON.parse(raw), isHydrated: true });
+      const data = await StorageService.get<PlannedSession[]>(STORAGE_KEY);
+      if (data) {
+        set({ sessions: data, isHydrated: true });
       } else {
-        await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(MOCK_PLANNED_SESSIONS));
+        await StorageService.set(STORAGE_KEY, MOCK_PLANNED_SESSIONS);
         set({ sessions: MOCK_PLANNED_SESSIONS, isHydrated: true });
       }
     } catch {
@@ -39,19 +39,19 @@ export const useSessionStore = create<SessionState>((set, get) => ({
   addSession: async (session) => {
     const updated = [...get().sessions, session];
     set({ sessions: updated });
-    await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
+    await StorageService.set(STORAGE_KEY, updated);
   },
 
   updateSession: async (session) => {
     const updated = get().sessions.map((s) => (s.id === session.id ? session : s));
     set({ sessions: updated });
-    await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
+    await StorageService.set(STORAGE_KEY, updated);
   },
 
   deleteSession: async (id) => {
     const updated = get().sessions.filter((s) => s.id !== id);
     set({ sessions: updated });
-    await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
+    await StorageService.set(STORAGE_KEY, updated);
   },
 
   duplicateSession: async (id) => {
@@ -67,7 +67,7 @@ export const useSessionStore = create<SessionState>((set, get) => ({
     };
     const updated = [...get().sessions, duplicate];
     set({ sessions: updated });
-    await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
+    await StorageService.set(STORAGE_KEY, updated);
   },
 
   markCompleted: async (id) => {
@@ -75,7 +75,7 @@ export const useSessionStore = create<SessionState>((set, get) => ({
       s.id === id ? { ...s, status: 'completed' as const } : s
     );
     set({ sessions: updated });
-    await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
+    await StorageService.set(STORAGE_KEY, updated);
   },
 
   markSkipped: async (id) => {
@@ -83,6 +83,6 @@ export const useSessionStore = create<SessionState>((set, get) => ({
       s.id === id ? { ...s, status: 'skipped' as const } : s
     );
     set({ sessions: updated });
-    await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
+    await StorageService.set(STORAGE_KEY, updated);
   },
 }));

@@ -1,6 +1,6 @@
 // store/goalStore.ts
 import { create } from 'zustand';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { StorageService } from '../services/storageService';
 import { Goal } from '../models/types';
 import { MOCK_GOALS } from '../models/mockData';
 
@@ -22,11 +22,11 @@ export const useGoalStore = create<GoalState>((set, get) => ({
 
   hydrate: async () => {
     try {
-      const raw = await AsyncStorage.getItem(STORAGE_KEY);
-      if (raw) {
-        set({ goals: JSON.parse(raw), isHydrated: true });
+      const data = await StorageService.get<Goal[]>(STORAGE_KEY);
+      if (data) {
+        set({ goals: data, isHydrated: true });
       } else {
-        await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(MOCK_GOALS));
+        await StorageService.set(STORAGE_KEY, MOCK_GOALS);
         set({ goals: MOCK_GOALS, isHydrated: true });
       }
     } catch {
@@ -37,19 +37,19 @@ export const useGoalStore = create<GoalState>((set, get) => ({
   addGoal: async (goal) => {
     const updated = [...get().goals, goal];
     set({ goals: updated });
-    await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
+    await StorageService.set(STORAGE_KEY, updated);
   },
 
   updateGoal: async (goal) => {
     const updated = get().goals.map((g) => (g.id === goal.id ? goal : g));
     set({ goals: updated });
-    await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
+    await StorageService.set(STORAGE_KEY, updated);
   },
 
   deleteGoal: async (id) => {
     const updated = get().goals.filter((g) => g.id !== id);
     set({ goals: updated });
-    await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
+    await StorageService.set(STORAGE_KEY, updated);
   },
 
   updateProgress: async (id, newValue) => {
@@ -63,6 +63,6 @@ export const useGoalStore = create<GoalState>((set, get) => ({
       };
     });
     set({ goals: updated });
-    await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
+    await StorageService.set(STORAGE_KEY, updated);
   },
 }));

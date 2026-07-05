@@ -1,7 +1,9 @@
 // app/_layout.tsx
 import { useEffect } from 'react';
-import { Stack } from 'expo-router';
+import { Stack, useRouter } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
+import { TouchableOpacity, Text } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { useExerciseStore } from '../store/exerciseStore';
 import { useWorkoutPlanStore } from '../store/workoutPlanStore';
 import { useSessionStore } from '../store/sessionStore';
@@ -10,6 +12,7 @@ import { useGoalStore } from '../store/goalStore';
 import { Colors } from '../constants/theme';
 
 export default function RootLayout() {
+  const router = useRouter();
   const hydrateExercises = useExerciseStore((s) => s.hydrate);
   const hydratePlans = useWorkoutPlanStore((s) => s.hydrate);
   const hydrateSessions = useSessionStore((s) => s.hydrate);
@@ -34,6 +37,22 @@ export default function RootLayout() {
           headerTitleStyle: { fontWeight: 'bold' },
           contentStyle: { backgroundColor: Colors.background },
           headerBackTitle: 'back',
+          headerLeft: ({ canGoBack }) =>
+            canGoBack ? (
+              <TouchableOpacity
+                onPress={() => router.back()}
+                style={{
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  paddingLeft: 4,
+                  paddingRight: 10,
+                  paddingVertical: 5,
+                }}
+              >
+                <Ionicons name="chevron-back" size={24} color="#000000" />
+                <Text style={{ fontSize: 16, color: '#000000', marginLeft: -4 }}>Back</Text>
+              </TouchableOpacity>
+            ) : undefined,
         }}
       >
         <Stack.Screen name="(tabs)" options={{ headerShown: false, headerBackTitle: 'back' }} />
