@@ -9,10 +9,9 @@ L'applicazione è interamente sviluppata con **React Native** ed **Expo**, ed è
 
 ## 🎨 Design & Visual Identity
 
-HabitUp ti accoglie con un'interfaccia moderna e premium, progettata per farti sentire subito attivo e focalizzato:
-*   **Palette di Colori Premium**: Basata sulle sfumature ufficiali del brand (il **Blu `#0084FF`** di HabitUp e il **Verde Smeraldo `#00D084`**).
+HabitUp ti accoglie con un'interfaccia moderna, progettata per farti sentire subito attivo e focalizzato:
+*   **Palette di Colori**: Basata sulle sfumature ufficiali del brand (il **Blu `#0084FF`** di HabitUp e il **Verde Smeraldo `#00D084`**).
 *   **Sfondo Acquamarina Delicato (`#E0F2F1`)**: Uno sfondo rilassante e professionale comune a tutte le schermate.
-*   **Hero Card Sfumata**: La dashboard principale accoglie l'atleta con una scheda di allenamento del giorno arricchita da un gradiente lineare nativo sfumato e dal logo sferico in alta definizione integrato nell'header.
 
 ---
 
