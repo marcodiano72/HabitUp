@@ -16,6 +16,8 @@ import { useGoalStore } from '../../store/goalStore';
 import { useSessionStore } from '../../store/sessionStore';
 import { useWorkoutPlanStore } from '../../store/workoutPlanStore';
 import { Colors, Spacing, Radius, FontSize, Shadow } from '../../constants/theme';
+import { getLocalDateString } from '../../utils/date';
+
 
 export default function HomeScreen() {
   const router = useRouter();
@@ -28,7 +30,7 @@ export default function HomeScreen() {
   const totalWorkouts = history.length;
   const activeGoals = goals.filter((g) => g.status === 'Attivo').length;
 
-  const todayStr = new Date().toISOString().split('T')[0];
+  const todayStr = getLocalDateString();
   const todaySession = sessions.find((s) => s.scheduledDate === todayStr && s.status === 'planned');
   const todayPlan = todaySession ? plans.find((p) => p.id === todaySession.planId) : null;
 
@@ -68,29 +70,32 @@ export default function HomeScreen() {
       </View>
 
       {todayPlan ? (
-        <TouchableOpacity
-          style={styles.heroCardContainer}
-          activeOpacity={0.9}
-          onPress={() => router.push({ pathname: '/session/active/[id]', params: { id: todaySession!.id } })}
-        >
-          <LinearGradient
-            colors={[Colors.primary, Colors.accent]}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 1 }}
-            style={styles.heroCardGradient}
+        <View style={styles.heroCardContainer}>
+          <TouchableOpacity
+            activeOpacity={0.9}
+            style={styles.heroCardInner}
+            onPress={() => router.push({ pathname: '/session/active/[id]', params: { id: todaySession!.id } })}
           >
-            <View style={styles.heroContent}>
-              <View style={styles.heroBadge}>
-                <Text style={styles.heroBadgeText}>PRONTO</Text>
+            <LinearGradient
+              colors={[Colors.primary, Colors.accent]}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+              style={StyleSheet.absoluteFillObject}
+            />
+            <View style={styles.heroCardContentWrapper}>
+              <View style={styles.heroContent}>
+                <View style={styles.heroBadge}>
+                  <Text style={styles.heroBadgeText}>PRONTO</Text>
+                </View>
+                <Text style={styles.heroTitle} numberOfLines={1}>{todayPlan.name}</Text>
+                <Text style={styles.heroSub}>{todayPlan.expectedDuration} min • {todayPlan.exercises.length} esercizi</Text>
               </View>
-              <Text style={styles.heroTitle} numberOfLines={1}>{todayPlan.name}</Text>
-              <Text style={styles.heroSub}>{todayPlan.expectedDuration} min • {todayPlan.exercises.length} esercizi</Text>
+              <View style={styles.heroPlayBtn}>
+                <Ionicons name="play" size={24} color={Colors.primary} />
+              </View>
             </View>
-            <View style={styles.heroPlayBtn}>
-              <Ionicons name="play" size={24} color={Colors.primary} />
-            </View>
-          </LinearGradient>
-        </TouchableOpacity>
+          </TouchableOpacity>
+        </View>
       ) : (
         <TouchableOpacity
           style={styles.heroEmptyCard}
@@ -186,8 +191,9 @@ const styles = StyleSheet.create({
   viewAllText: { fontSize: FontSize.sm, color: Colors.primary, fontWeight: '600' },
 
   // Hero Card Gradient
-  heroCardContainer: { borderRadius: Radius.xl, overflow: 'hidden', marginBottom: Spacing.lg, ...Shadow.md },
-  heroCardGradient: { padding: Spacing.xl, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+  heroCardContainer: { borderRadius: Radius.xl, marginBottom: Spacing.lg, ...Shadow.md, backgroundColor: Colors.primary },
+  heroCardInner: { borderRadius: Radius.xl, overflow: 'hidden', backgroundColor: Colors.primary },
+  heroCardContentWrapper: { padding: Spacing.xl, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', backgroundColor: 'transparent' },
   heroContent: { flex: 1, marginRight: Spacing.md },
   heroBadge: { backgroundColor: 'rgba(255,255,255,0.25)', alignSelf: 'flex-start', paddingHorizontal: 10, paddingVertical: 4, borderRadius: Radius.full, marginBottom: 8 },
   heroBadgeText: { color: '#fff', fontSize: 10, fontWeight: '800', letterSpacing: 1 },

@@ -1,6 +1,6 @@
 // app/session/list.tsx — Gestione Agenda Sessioni
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, FlatList, TouchableOpacity, Alert } from 'react-native';
+import { View, Text, StyleSheet, FlatList, TouchableOpacity, Alert, ScrollView } from 'react-native';
 import { useRouter, Stack } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useSessionStore } from '../../store/sessionStore';
@@ -91,7 +91,11 @@ export default function SessionListScreen() {
 
         <View style={styles.divider} />
 
-        <View style={styles.actionsRow}>
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={styles.actionsRow}
+        >
           {item.status === 'planned' ? (
             <>
               <TouchableOpacity style={styles.actionBtn} onPress={() => router.push({ pathname: '/session/active/[id]', params: { id: item.id } })}>
@@ -129,7 +133,7 @@ export default function SessionListScreen() {
           <TouchableOpacity style={styles.iconBtn} onPress={() => handleElimina(item.id)}>
             <Ionicons name="trash-outline" size={18} color={Colors.danger} />
           </TouchableOpacity>
-        </View>
+        </ScrollView>
       </View>
     );
   };

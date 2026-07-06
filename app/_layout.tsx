@@ -1,15 +1,15 @@
 // app/_layout.tsx
-import { useEffect } from 'react';
+import { Ionicons } from '@expo/vector-icons';
 import { Stack, useRouter } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
-import { TouchableOpacity, Text } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
-import { useExerciseStore } from '../store/exerciseStore';
-import { useWorkoutPlanStore } from '../store/workoutPlanStore';
-import { useSessionStore } from '../store/sessionStore';
-import { useHistoryStore } from '../store/historyStore';
-import { useGoalStore } from '../store/goalStore';
+import { useEffect } from 'react';
+import { Text, TouchableOpacity } from 'react-native';
 import { Colors } from '../constants/theme';
+import { useExerciseStore } from '../store/exerciseStore';
+import { useGoalStore } from '../store/goalStore';
+import { useHistoryStore } from '../store/historyStore';
+import { useSessionStore } from '../store/sessionStore';
+import { useWorkoutPlanStore } from '../store/workoutPlanStore';
 
 export default function RootLayout() {
   const router = useRouter();

@@ -3,6 +3,7 @@ import { create } from 'zustand';
 import { StorageService } from '../services/storageService';
 import { PlannedSession } from '../models/types';
 import { MOCK_PLANNED_SESSIONS } from '../models/mockData';
+import { getLocalDateString } from '../utils/date';
 
 const STORAGE_KEY = '@planned_sessions';
 
@@ -62,7 +63,7 @@ export const useSessionStore = create<SessionState>((set, get) => ({
     const duplicate: PlannedSession = {
       ...original,
       id: Date.now().toString(),
-      scheduledDate: tomorrow.toISOString().split('T')[0],
+      scheduledDate: getLocalDateString(tomorrow),
       status: 'planned',
     };
     const updated = [...get().sessions, duplicate];

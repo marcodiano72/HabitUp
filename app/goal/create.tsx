@@ -8,6 +8,8 @@ import { useRouter, Stack } from 'expo-router';
 import { useGoalStore } from '../../store/goalStore';
 import { Goal } from '../../models/types';
 import { Colors, Spacing, Radius, FontSize, Shadow } from '../../constants/theme';
+import { getLocalDateString } from '../../utils/date';
+
 
 const CATEGORIES = ['Forza', 'Ipertrofia', 'Resistenza', 'Peso corporeo', 'Frequenza', 'Flessibilità'];
 
@@ -32,7 +34,7 @@ export default function CreateGoalScreen() {
       category,
       targetValue: parseFloat(targetValue),
       currentValue: parseFloat(currentValue) || 0,
-      startDate: new Date().toISOString().split('T')[0],
+      startDate: getLocalDateString(),
       endDate: endDate.trim() || undefined,
       status: 'Attivo',
     };

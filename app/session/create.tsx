@@ -10,13 +10,15 @@ import { useSessionStore } from '../../store/sessionStore';
 import { useWorkoutPlanStore } from '../../store/workoutPlanStore';
 import { PlannedSession } from '../../models/types';
 import { Colors, Spacing, Radius, FontSize, Shadow } from '../../constants/theme';
+import { getLocalDateString } from '../../utils/date';
+
 
 export default function CreateSessionScreen() {
   const router = useRouter();
   const addSession = useSessionStore((s) => s.addSession);
   const plans = useWorkoutPlanStore((s) => s.plans);
 
-  const todayStr = new Date().toISOString().split('T')[0];
+  const todayStr = getLocalDateString();
   const [selectedPlanId, setSelectedPlanId] = useState(plans[0]?.id ?? '');
   const [date, setDate] = useState(todayStr);
   const [notes, setNotes] = useState('');
