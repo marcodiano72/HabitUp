@@ -25,9 +25,23 @@ export const useSessionStore = create<SessionState>((set, get) => ({
 
   hydrate: async () => {
     try {
-      const data = await StorageService.get<PlannedSession[]>(STORAGE_KEY);
+      let data = await StorageService.get<PlannedSession[]>(STORAGE_KEY);
       if (data) {
+        // Aggiorna le date delle sessioni mock per mantenerle coerenti con la data corrente
+        const todayStr = getLocalDateString();
+        data = data.map((s) => {
+          if (s.id === 'ps1') {
+            return { ...s, scheduledDate: todayStr };
+          }
+          if (s.id === 'ps2') {
+            const afterTwoDays = new Date();
+            afterTwoDays.setDate(afterTwoDays.getDate() + 2);
+            return { ...s, scheduledDate: getLocalDateString(afterTwoDays) };
+          }
+          return s;
+        });
         set({ sessions: data, isHydrated: true });
+        await StorageService.set(STORAGE_KEY, data);
       } else {
         await StorageService.set(STORAGE_KEY, MOCK_PLANNED_SESSIONS);
         set({ sessions: MOCK_PLANNED_SESSIONS, isHydrated: true });
