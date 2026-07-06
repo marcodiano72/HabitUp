@@ -17,7 +17,7 @@ HabitUp ti accoglie con un'interfaccia moderna, progettata per farti sentire sub
 
 ## 🔥 Funzionalità Principali
 
-### 📅 Agenda & Pianificazione Sessioni (Nuova Feature!)
+### 📅 Agenda & Pianificazione Sessioni 
 Non perdere più un giorno di allenamento! Con la nuova sezione **Agenda** puoi:
 *   Pianificare le tue sessioni per date specifiche.
 *   Monitorare lo stato degli allenamenti divisi tra **Pianificati** e **Storico Agenda**.
