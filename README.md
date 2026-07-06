@@ -1,50 +1,98 @@
-# Welcome to your Expo app 👋
+# HabitUp 🏋️‍♂️✨
+### *Track. Build. Rise.*
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+Benvenuto in **HabitUp**, la tua nuova applicazione preferita per organizzare allenamenti, schede di allenamento, monitorare i progressi fisici e raggiungere i tuoi obiettivi di fitness! 🚀
 
-## Get started
+L'applicazione è interamente sviluppata con **React Native** ed **Expo**, ed è pensata per offrire un'esperienza fluida, motivante e visivamente straordinaria sia su iOS che su Android.
 
-1. Install dependencies
+---
 
-   ```bash
-   npm install
-   ```
+## 🎨 Design & Visual Identity
 
-2. Start the app
+HabitUp ti accoglie con un'interfaccia moderna e premium, progettata per farti sentire subito attivo e focalizzato:
+*   **Palette di Colori Premium**: Basata sulle sfumature ufficiali del brand (il **Blu `#0084FF`** di HabitUp e il **Verde Smeraldo `#00D084`**).
+*   **Sfondo Acquamarina Delicato (`#E0F2F1`)**: Uno sfondo rilassante e professionale comune a tutte le schermate.
+*   **Hero Card Sfumata**: La dashboard principale accoglie l'atleta con una scheda di allenamento del giorno arricchita da un gradiente lineare nativo sfumato e dal logo sferico in alta definizione integrato nell'header.
 
-   ```bash
-   npx expo start
-   ```
+---
 
-In the output, you'll find options to open the app in a
+## 🔥 Funzionalità Principali
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+### 📅 Agenda & Pianificazione Sessioni (Nuova Feature!)
+Non perdere più un giorno di allenamento! Con la nuova sezione **Agenda** puoi:
+*   Pianificare le tue sessioni per date specifiche.
+*   Monitorare lo stato degli allenamenti divisi tra **Pianificati** e **Storico Agenda**.
+*   **Duplicazione Rapida**: Duplica una sessione programmata per i giorni successivi con un solo tocco per creare rapidamente la tua settimana di allenamento.
+*   Azioni rapide per segnare una sessione come completata, saltata o per modificarne i dettagli al volo.
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+### 📊 Grafici Statistici & Analisi Avanzate (Nuova Feature!)
+Visualizza la tua crescita grazie alla dashboard statistica integrata con grafici interattivi:
+*   **Andamento Durata (Bar Chart)**: Tieni traccia dei minuti spesi ad allenarti nelle ultime 6 sessioni.
+*   **Trend Fatica RPE (Line Chart)**: Analizza la variazione dello sforzo percepito (scala RPE 1-10) nel tempo.
+*   **Volume di Lavoro per Gruppo Muscolare (Distribuzione)**: Scopri quante serie totali hai svolto per ciascun distretto muscolare (es. Pettorali, Dorsali, Gambe) per bilanciare la tua scheda.
 
-## Get a fresh project
+### ⏱️ Modalità Allenamento Guidato & Timer Integrato
+Inizia la scheda direttamente dall'app! L'allenamento guidato ti accompagna serie dopo serie:
+*   Visualizzazione del progresso globale e dell'esercizio corrente.
+*   **Timer di Recupero Automatico**: Con countdown visivo ed avvisi acustici alla scadenza del tempo di riposo.
+*   Inserimento dei carichi effettivamente sollevati e delle ripetizioni eseguite.
+*   Rating di fatica (RPE) e note personali al termine della sessione.
 
-When you're ready, run:
+### 📚 Libreria Esercizi & Filtri Intelligenti
+Gestisci un database completo di esercizi:
+*   **CRUD Completo**: Aggiungi i tuoi esercizi personalizzati, modificali o eliminali.
+*   **Ricerca Avanzata**: Filtra la lista all'istante per gruppo muscolare, tipo di attrezzatura (es. Bilanciere, Manubri, Corpo Libero) e difficoltà.
 
-```bash
-npm run reset-project
-```
+### 📋 Schede di Allenamento (Plans)
+Costruisci la tua scheda ideale:
+*   Associa gli esercizi impostando ordine, numero di serie, ripetizioni, peso e tempo di recupero.
+*   Filtra le schede per livello di difficoltà e per obiettivo (Forza, Ipertrofia, Dimagrimento, ecc.).
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+### 🎯 Obiettivi Personali (Goals)
+Resta motivato impostando i tuoi traguardi:
+*   Crea obiettivi personalizzati con data di scadenza e progresso in percentuale.
+*   Filtra gli obiettivi per stato (Attivi, Completati, Abbandonati).
 
-## Learn more
+---
 
-To learn more about developing your project with Expo, look at the following resources:
+## 🛠️ Navigazione Standardizzata
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+Tutta la navigazione dell'app è stata allineata per essere pulita e naturale:
+*   I pulsanti di ritorno in alto a sinistra sono stati standardizzati su tutte le piattaforme con la dicitura **`< back`** per evitare disallineamenti di testo o l'auto-hiding nativo di iOS sui titoli molto lunghi (come ad esempio *Shoulder Press*).
 
-## Join the community
+---
 
-Join our community of developers creating universal apps.
+## 🚀 Come Iniziare
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+### Prerequisiti
+Assicurati di avere installato sul tuo computer [Node.js](https://nodejs.org/).
+
+### Configurazione
+1.  Clona il repository ed entra nella cartella del progetto:
+    ```bash
+    cd Fitness_Workout_Tracker_App/HabitUp
+    ```
+2.  Installa le dipendenze:
+    ```bash
+    npm install
+    ```
+3.  Avvia il server di sviluppo Expo:
+    ```bash
+    npx expo start
+    ```
+
+Ora puoi scansionare il codice QR sul tuo smartphone tramite l'applicazione **Expo Go** (disponibile su App Store e Google Play) o avviare l'app su un emulatore iOS/Android!
+
+---
+
+## 💻 Tech Stack
+*   **Core**: React Native (Expo SDK)
+*   **Routing**: Expo Router (File-system based navigation)
+*   **State Management**: Zustand
+*   **Storage locale**: AsyncStorage
+*   **Grafica**: React Native Gifted Charts, Expo Linear Gradient, Expo Vector Icons (Ionicons).
+*   **Linguaggio**: TypeScript
+
+---
+
+### *Pronto a superare i tuoi limiti? Scarica la scheda, allacciati le scarpe e lascia che HabitUp pensi al resto! 🚀💪*
