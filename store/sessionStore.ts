@@ -4,6 +4,8 @@ import { StorageService } from '../services/storageService';
 import { PlannedSession } from '../models/types';
 import { MOCK_PLANNED_SESSIONS } from '../models/mockData';
 import { getLocalDateString } from '../utils/date';
+import { NotificationService } from '../services/notificationService';
+import { useWorkoutPlanStore } from './workoutPlanStore';
 
 const STORAGE_KEY = '@planned_sessions';
 
@@ -52,18 +54,49 @@ export const useSessionStore = create<SessionState>((set, get) => ({
   },
 
   addSession: async (session) => {
-    const updated = [...get().sessions, session];
+    let notificationId: string | undefined;
+    try {
+      const plans = useWorkoutPlanStore.getState().plans;
+      const planName = plans.find((p) => p.id === session.planId)?.name ?? 'Allenamento';
+      notificationId = await NotificationService.scheduleSessionNotification(session, planName);
+    } catch (e) {
+      console.warn('Errore programmazione notifica in addSession:', e);
+    }
+
+    const sessionWithNotification = { ...session, notificationId };
+    const updated = [...get().sessions, sessionWithNotification];
     set({ sessions: updated });
     await StorageService.set(STORAGE_KEY, updated);
   },
 
   updateSession: async (session) => {
-    const updated = get().sessions.map((s) => (s.id === session.id ? session : s));
+    const oldSession = get().sessions.find((s) => s.id === session.id);
+    let notificationId = oldSession?.notificationId;
+
+    if (oldSession && (oldSession.scheduledDate !== session.scheduledDate || oldSession.planId !== session.planId)) {
+      if (oldSession.notificationId) {
+        await NotificationService.cancelNotification(oldSession.notificationId);
+      }
+      try {
+        const plans = useWorkoutPlanStore.getState().plans;
+        const planName = plans.find((p) => p.id === session.planId)?.name ?? 'Allenamento';
+        notificationId = await NotificationService.scheduleSessionNotification(session, planName);
+      } catch (e) {
+        console.warn('Errore programmazione notifica in updateSession:', e);
+      }
+    }
+
+    const updated = get().sessions.map((s) => (s.id === session.id ? { ...session, notificationId } : s));
     set({ sessions: updated });
     await StorageService.set(STORAGE_KEY, updated);
   },
 
   deleteSession: async (id) => {
+    const session = get().sessions.find((s) => s.id === id);
+    if (session?.notificationId) {
+      await NotificationService.cancelNotification(session.notificationId);
+    }
+
     const updated = get().sessions.filter((s) => s.id !== id);
     set({ sessions: updated });
     await StorageService.set(STORAGE_KEY, updated);
@@ -74,28 +107,49 @@ export const useSessionStore = create<SessionState>((set, get) => ({
     if (!original) return;
     const tomorrow = new Date();
     tomorrow.setDate(tomorrow.getDate() + 1);
+    
     const duplicate: PlannedSession = {
       ...original,
       id: Date.now().toString(),
       scheduledDate: getLocalDateString(tomorrow),
       status: 'planned',
     };
-    const updated = [...get().sessions, duplicate];
+
+    let notificationId: string | undefined;
+    try {
+      const plans = useWorkoutPlanStore.getState().plans;
+      const planName = plans.find((p) => p.id === duplicate.planId)?.name ?? 'Allenamento';
+      notificationId = await NotificationService.scheduleSessionNotification(duplicate, planName);
+    } catch (e) {
+      console.warn('Errore programmazione notifica in duplicateSession:', e);
+    }
+
+    const updated = [...get().sessions, { ...duplicate, notificationId }];
     set({ sessions: updated });
     await StorageService.set(STORAGE_KEY, updated);
   },
 
   markCompleted: async (id) => {
+    const session = get().sessions.find((s) => s.id === id);
+    if (session?.notificationId) {
+      await NotificationService.cancelNotification(session.notificationId);
+    }
+
     const updated = get().sessions.map((s) =>
-      s.id === id ? { ...s, status: 'completed' as const } : s
+      s.id === id ? { ...s, status: 'completed' as const, notificationId: undefined } : s
     );
     set({ sessions: updated });
     await StorageService.set(STORAGE_KEY, updated);
   },
 
   markSkipped: async (id) => {
+    const session = get().sessions.find((s) => s.id === id);
+    if (session?.notificationId) {
+      await NotificationService.cancelNotification(session.notificationId);
+    }
+
     const updated = get().sessions.map((s) =>
-      s.id === id ? { ...s, status: 'skipped' as const } : s
+      s.id === id ? { ...s, status: 'skipped' as const, notificationId: undefined } : s
     );
     set({ sessions: updated });
     await StorageService.set(STORAGE_KEY, updated);

@@ -4,12 +4,25 @@ import { Stack, useRouter } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect } from 'react';
 import { Text, TouchableOpacity } from 'react-native';
+import * as Notifications from 'expo-notifications';
 import { Colors } from '../constants/theme';
 import { useExerciseStore } from '../store/exerciseStore';
 import { useGoalStore } from '../store/goalStore';
 import { useHistoryStore } from '../store/historyStore';
 import { useSessionStore } from '../store/sessionStore';
 import { useWorkoutPlanStore } from '../store/workoutPlanStore';
+import { NotificationService } from '../services/notificationService';
+
+// Configurazione globale di come devono essere mostrate le notifiche ad app attiva
+Notifications.setNotificationHandler({
+  handleNotification: async () => ({
+    shouldShowAlert: true,
+    shouldPlaySound: true,
+    shouldSetBadge: false,
+    shouldShowBanner: true,
+    shouldShowList: true,
+  }),
+});
 
 export default function RootLayout() {
   const router = useRouter();
@@ -25,7 +38,22 @@ export default function RootLayout() {
     hydrateSessions();
     hydrateHistory();
     hydrateGoals();
-  }, [hydrateExercises, hydratePlans, hydrateSessions, hydrateHistory, hydrateGoals]);
+
+    // Richiesta asincrona dei permessi nativi all'avvio
+    NotificationService.requestPermission();
+
+    // Listener per catturare il click dell'utente sulle notifiche locali
+    const subscription = Notifications.addNotificationResponseReceivedListener((response) => {
+      const sessionId = response.notification.request.content.data?.sessionId as string | undefined;
+      if (sessionId) {
+        router.push({ pathname: '/session/active/[id]', params: { id: sessionId } });
+      }
+    });
+
+    return () => {
+      subscription.remove();
+    };
+  }, [hydrateExercises, hydratePlans, hydrateSessions, hydrateHistory, hydrateGoals, router]);
 
   return (
     <>

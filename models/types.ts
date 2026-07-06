@@ -52,6 +52,7 @@ export interface PlannedSession {
   scheduledDate: string;   // formato: 'YYYY-MM-DD'
   status: SessionStatus;
   notes?: string;
+  notificationId?: string; // ID della notifica locale programmata
 }
 
 // ─────────────────────────────────────────────
