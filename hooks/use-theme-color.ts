@@ -1,7 +1,4 @@
-/**
- * Hook per il colore del tema — adattato al design system custom.
- * Non usa più Colors.light / Colors.dark (struttura vecchia di Expo).
- */
+
 
 import { Colors } from '@/constants/theme';
 
