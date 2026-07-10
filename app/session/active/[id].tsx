@@ -37,7 +37,7 @@ export default function ActiveSessionScreen() {
   const timer = useTimer();
   const animazioneTimer = useRef(new Animated.Value(0)).current;
 
-  // Feedback aptico all'avvio della scheda di allenamento (successo)
+  // Feedback aptico all'avvio della scheda di allenamento
   useEffect(() => {
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
   }, []);
