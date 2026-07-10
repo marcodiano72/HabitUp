@@ -1,15 +1,16 @@
 // app/session/active/[id].tsx — Schermata Allenamento Attivo con Timer
-import React, { useState, useEffect, useRef } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, TextInput, Animated, Easing } from 'react-native';
-import { useLocalSearchParams, Stack, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import { useSessionStore } from '../../../store/sessionStore';
-import { useWorkoutPlanStore } from '../../../store/workoutPlanStore';
-import { useExerciseStore } from '../../../store/exerciseStore';
-import { useHistoryStore } from '../../../store/historyStore';
+import * as Haptics from 'expo-haptics';
+import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
+import React, { useEffect, useRef, useState } from 'react';
+import { Alert, Animated, Easing, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { Colors, FontSize, Radius, Shadow, Spacing } from '../../../constants/theme';
 import { useTimer } from '../../../hooks/useTimer';
 import { SessionExercise, WorkoutSession } from '../../../models/types';
-import { Colors, Spacing, Radius, FontSize, Shadow } from '../../../constants/theme';
+import { useExerciseStore } from '../../../store/exerciseStore';
+import { useHistoryStore } from '../../../store/historyStore';
+import { useSessionStore } from '../../../store/sessionStore';
+import { useWorkoutPlanStore } from '../../../store/workoutPlanStore';
 
 export default function ActiveSessionScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -36,6 +37,11 @@ export default function ActiveSessionScreen() {
   const timer = useTimer();
   const animazioneTimer = useRef(new Animated.Value(0)).current;
 
+  // Feedback aptico all'avvio della scheda di allenamento (successo)
+  useEffect(() => {
+    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+  }, []);
+
   useEffect(() => {
     if (fase === 'recupero' && timer.status === 'running') {
       Animated.timing(animazioneTimer, {
@@ -45,6 +51,7 @@ export default function ActiveSessionScreen() {
         useNativeDriver: false,
       }).start();
     } else if (timer.status === 'finished') {
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
       setFase('allenamento');
       const esercizioCorrente = piano?.exercises[indiceEsercizioCorrente];
       setSerieCorrente((s) => {
@@ -75,6 +82,9 @@ export default function ActiveSessionScreen() {
   const handleSerieCompletata = () => {
     const peso = parseFloat(pesoInserito) || 0;
     const rip = parseInt(ripetizioni) || esercizioSchedaCorrente.reps;
+
+    // Vibrazione media al completamento di ogni serie
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
 
     setRegistrazioni((prev) => {
       const esistente = prev.find((l) => l.exerciseId === esercizioSchedaCorrente.exerciseId);
@@ -144,7 +154,7 @@ export default function ActiveSessionScreen() {
 
         <Text style={styles.etichettaFatica}>Com&apos;è andata? (RPE 1–10)</Text>
         <View style={styles.selettoreFatica}>
-          {[1,2,3,4,5,6,7,8,9,10].map((n) => (
+          {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((n) => (
             <TouchableOpacity
               key={n}
               style={[styles.numeroFatica, livelloFatica === n && styles.numeriFaticaSelezionato]}
