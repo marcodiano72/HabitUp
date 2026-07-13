@@ -87,8 +87,8 @@ export default function ActiveSessionScreen() {
       Alert.alert('Errore', 'Il numero di ripetizioni deve essere maggiore di zero.');
       return;
     }
-    if (peso < 0) {
-      Alert.alert('Errore', 'Il peso utilizzato non può essere negativo.');
+    if (peso <= 0) {
+      Alert.alert('Errore', 'Il peso utilizzato deve essere maggiore di zero.');
       return;
     }
 
@@ -262,7 +262,7 @@ export default function ActiveSessionScreen() {
                 <TextInput
                   style={styles.inputRegistrazione}
                   value={ripetizioni}
-                  onChangeText={setRipetizioni}
+                  onChangeText={(text) => setRipetizioni(text.replace(/[^0-9]/g, ''))}
                   keyboardType="numeric"
                   placeholder={String(esercizioSchedaCorrente.reps)}
                   placeholderTextColor={Colors.textMuted}
@@ -274,7 +274,7 @@ export default function ActiveSessionScreen() {
                 <TextInput
                   style={styles.inputRegistrazione}
                   value={pesoInserito}
-                  onChangeText={setPesoInserito}
+                  onChangeText={(text) => setPesoInserito(text.replace(/[^0-9.]/g, ''))}
                   keyboardType="decimal-pad"
                   placeholder={esercizioSchedaCorrente.weight ? String(esercizioSchedaCorrente.weight) : '0'}
                   placeholderTextColor={Colors.textMuted}
