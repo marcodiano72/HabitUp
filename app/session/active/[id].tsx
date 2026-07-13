@@ -83,6 +83,15 @@ export default function ActiveSessionScreen() {
     const peso = parseFloat(pesoInserito) || 0;
     const rip = parseInt(ripetizioni) || esercizioSchedaCorrente.reps;
 
+    if (rip <= 0) {
+      Alert.alert('Errore', 'Il numero di ripetizioni deve essere maggiore di zero.');
+      return;
+    }
+    if (peso < 0) {
+      Alert.alert('Errore', 'Il peso utilizzato non può essere negativo.');
+      return;
+    }
+
     // Vibrazione media al completamento di ogni serie
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
 

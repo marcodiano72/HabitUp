@@ -42,13 +42,26 @@ export default function EditGoalScreen() {
 
   const handleSave = async () => {
     if (!title.trim()) { Alert.alert('Errore', 'Inserisci il titolo.'); return; }
+    
+    const target = parseFloat(targetValue);
+    if (isNaN(target) || target <= 0) {
+      Alert.alert('Errore', 'Il valore target deve essere un numero maggiore di zero.');
+      return;
+    }
+    
+    const current = parseFloat(currentValue) || 0;
+    if (current < 0) {
+      Alert.alert('Errore', 'Il valore attuale non può essere negativo.');
+      return;
+    }
+
     await updateGoal({
       ...goal,
       title: title.trim(),
       description: description.trim() || undefined,
       category,
-      targetValue: parseFloat(targetValue) || goal.targetValue,
-      currentValue: parseFloat(currentValue) || 0,
+      targetValue: target,
+      currentValue: current,
       endDate: endDate.trim() || undefined,
       status,
     });

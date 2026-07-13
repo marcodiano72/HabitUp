@@ -26,14 +26,26 @@ export default function CreateGoalScreen() {
 
   const handleSave = async () => {
     if (!title.trim()) { Alert.alert('Errore', 'Inserisci il titolo.'); return; }
-    if (!targetValue || isNaN(parseFloat(targetValue))) { Alert.alert('Errore', 'Inserisci un valore target numerico.'); return; }
+    
+    const target = parseFloat(targetValue);
+    if (isNaN(target) || target <= 0) {
+      Alert.alert('Errore', 'Il valore target deve essere un numero maggiore di zero.');
+      return;
+    }
+    
+    const current = parseFloat(currentValue) || 0;
+    if (current < 0) {
+      Alert.alert('Errore', 'Il valore attuale non può essere negativo.');
+      return;
+    }
+
     const goal: Goal = {
       id: Date.now().toString(),
       title: title.trim(),
       description: description.trim() || undefined,
       category,
-      targetValue: parseFloat(targetValue),
-      currentValue: parseFloat(currentValue) || 0,
+      targetValue: target,
+      currentValue: current,
       startDate: getLocalDateString(),
       endDate: endDate.trim() || undefined,
       status: 'Attivo',

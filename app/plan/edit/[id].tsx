@@ -23,7 +23,7 @@ export default function EditPlanScreen() {
   const [obiettivo, setObiettivo] = useState(piano?.goal ?? 'Ipertrofia');
   const [livello, setLivello] = useState<Difficulty>(piano?.level ?? 'Intermedio');
   const [durata, setDurata] = useState(String(piano?.expectedDuration ?? 60));
-  const [frequenza, setFrequenza] = useState(piano?.frequency ?? '');
+  const [frequenza, setFrequenza] = useState(piano?.frequency ? piano.frequency.replace(/[^0-9]/g, '') : '');
   const [eserciziScheda, setEserciziScheda] = useState<PlanExercise[]>(piano?.exercises ?? []);
   const [mostraSelettore, setMostraSelettore] = useState(false);
 
@@ -49,7 +49,46 @@ export default function EditPlanScreen() {
 
   const handleSalva = async () => {
     if (!nome.trim()) { Alert.alert('Errore', 'Inserisci il nome della scheda.'); return; }
-    await updatePlan({ ...piano, name: nome.trim(), goal: obiettivo, level: livello, expectedDuration: parseInt(durata) || 60, frequency: frequenza.trim() || undefined, exercises: eserciziScheda });
+    
+    const durataMin = parseInt(durata) || 0;
+    if (durataMin <= 0) {
+      Alert.alert('Errore', 'La durata prevista deve essere maggiore di zero.');
+      return;
+    }
+
+    if (eserciziScheda.length === 0) { Alert.alert('Errore', 'Aggiungi almeno un esercizio.'); return; }
+
+    for (const ex of eserciziScheda) {
+      const nomeEx = nomeEsercizio(ex.exerciseId);
+      if (ex.sets <= 0) {
+        Alert.alert('Errore', `Il numero di serie per "${nomeEx}" deve essere maggiore di zero.`);
+        return;
+      }
+      if (ex.reps <= 0) {
+        Alert.alert('Errore', `Le ripetizioni per "${nomeEx}" devono essere maggiori di zero.`);
+        return;
+      }
+      if (ex.restTime < 0) {
+        Alert.alert('Errore', `Il tempo di recupero per "${nomeEx}" non può essere negativo.`);
+        return;
+      }
+      if (ex.weight !== undefined && ex.weight < 0) {
+        Alert.alert('Errore', `Il peso per "${nomeEx}" non può essere negativo.`);
+        return;
+      }
+    }
+
+    let freqStr: string | undefined = undefined;
+    if (frequenza.trim()) {
+      const freqVal = parseInt(frequenza);
+      if (isNaN(freqVal) || freqVal <= 0) {
+        Alert.alert('Errore', 'La frequenza deve essere un valore maggiore di zero.');
+        return;
+      }
+      freqStr = `${freqVal}x/settimana`;
+    }
+
+    await updatePlan({ ...piano, name: nome.trim(), goal: obiettivo, level: livello, expectedDuration: durataMin, frequency: freqStr, exercises: eserciziScheda });
     router.back();
   };
 
@@ -92,8 +131,8 @@ export default function EditPlanScreen() {
           <TextInput style={styles.input} value={durata} onChangeText={setDurata} keyboardType="numeric" placeholderTextColor={Colors.textMuted} />
         </View>
         <View style={[styles.gruppoCampo, { flex: 1 }]}>
-          <Text style={styles.etichetta}>Frequenza</Text>
-          <TextInput style={styles.input} value={frequenza} onChangeText={setFrequenza} placeholderTextColor={Colors.textMuted} />
+          <Text style={styles.etichetta}>Frequenza (x/settimana)</Text>
+          <TextInput style={styles.input} value={frequenza} onChangeText={setFrequenza} keyboardType="numeric" placeholder="es. 3" placeholderTextColor={Colors.textMuted} />
         </View>
       </View>
 

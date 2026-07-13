@@ -42,14 +42,52 @@ export default function CreatePlanScreen() {
 
   const handleSalva = async () => {
     if (!nome.trim()) { Alert.alert('Errore', 'Inserisci il nome della scheda.'); return; }
+    
+    const durataMin = parseInt(durata) || 0;
+    if (durataMin <= 0) {
+      Alert.alert('Errore', 'La durata prevista deve essere maggiore di zero.');
+      return;
+    }
+
     if (eserciziScheda.length === 0) { Alert.alert('Errore', 'Aggiungi almeno un esercizio.'); return; }
+
+    for (const ex of eserciziScheda) {
+      const nomeEx = nomeEsercizio(ex.exerciseId);
+      if (ex.sets <= 0) {
+        Alert.alert('Errore', `Il numero di serie per "${nomeEx}" deve essere maggiore di zero.`);
+        return;
+      }
+      if (ex.reps <= 0) {
+        Alert.alert('Errore', `Le ripetizioni per "${nomeEx}" devono essere maggiori di zero.`);
+        return;
+      }
+      if (ex.restTime < 0) {
+        Alert.alert('Errore', `Il tempo di recupero per "${nomeEx}" non può essere negativo.`);
+        return;
+      }
+      if (ex.weight !== undefined && ex.weight < 0) {
+        Alert.alert('Errore', `Il peso per "${nomeEx}" non può essere negativo.`);
+        return;
+      }
+    }
+
+    let freqStr: string | undefined = undefined;
+    if (frequenza.trim()) {
+      const freqVal = parseInt(frequenza);
+      if (isNaN(freqVal) || freqVal <= 0) {
+        Alert.alert('Errore', 'La frequenza deve essere un valore maggiore di zero.');
+        return;
+      }
+      freqStr = `${freqVal}x/settimana`;
+    }
+
     const piano: WorkoutPlan = {
       id: Date.now().toString(),
       name: nome.trim(),
       goal: obiettivo,
       level: livello,
-      expectedDuration: parseInt(durata) || 60,
-      frequency: frequenza.trim() || undefined,
+      expectedDuration: durataMin,
+      frequency: freqStr,
       description: descrizione.trim() || undefined,
       exercises: eserciziScheda,
     };
@@ -96,8 +134,8 @@ export default function CreatePlanScreen() {
           <TextInput style={styles.input} value={durata} onChangeText={setDurata} keyboardType="numeric" placeholderTextColor={Colors.textMuted} />
         </View>
         <View style={[styles.gruppoCampo, { flex: 1 }]}>
-          <Text style={styles.etichetta}>Frequenza</Text>
-          <TextInput style={styles.input} value={frequenza} onChangeText={setFrequenza} placeholder="es. 3x/settimana" placeholderTextColor={Colors.textMuted} />
+          <Text style={styles.etichetta}>Frequenza (x/settimana)</Text>
+          <TextInput style={styles.input} value={frequenza} onChangeText={setFrequenza} keyboardType="numeric" placeholder="es. 3" placeholderTextColor={Colors.textMuted} />
         </View>
       </View>
 
